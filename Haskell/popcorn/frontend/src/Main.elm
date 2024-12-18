@@ -46,7 +46,16 @@ view model = div
 
 poppedImage : Html Msg 
 poppedImage = img [src "/popped"] []
+
+unpoppedImage : Html Msg 
+unpoppedImage = img [src "/unpopped"] []
+
+halfPoppedImage : Html Msg 
+halfPoppedImage = img [src "/halfPopped"] []
+
 popcornToImage : String -> List (Html Msg)
+
+
 
 popcornToImage s = 
       case String.toList s of 
@@ -54,8 +63,8 @@ popcornToImage s =
        (c :: cs) -> 
          case c of 
           'p' -> poppedImage :: (popcornToImage <| String.fromList cs)
-          'h' -> text "h" :: (popcornToImage <| String.fromList cs)
-          'u' -> text "h" :: (popcornToImage <| String.fromList cs)
+          'h' -> halfPoppedImage :: (popcornToImage <| String.fromList cs)
+          'u' -> unpoppedImage :: (popcornToImage <| String.fromList cs)
           _   -> text "" :: ((popcornToImage <| String.fromList cs))
 -------------------
 type Msg = Popcorn String
