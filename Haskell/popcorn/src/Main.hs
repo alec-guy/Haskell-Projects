@@ -29,6 +29,7 @@ main = do
                     let popcornBowl = fromPsuedoList $ Prelude.take (read s) pseudoPopcornBowl
                     json popcornBowl
       get"/popped" $ do 
+        liftIO $ putStrLn "popped image request"
         setHeader "Content-Type" "image/png"
         raw (Data.ByteString.fromStrict poppedPNG)
       
