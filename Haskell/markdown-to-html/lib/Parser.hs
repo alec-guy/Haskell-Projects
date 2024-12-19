@@ -52,7 +52,7 @@ parseWords :: Parser Text
 parseWords = pack <$> (many (alphaNumChar <|> (char ' ')))
 ---- I can't with this . i have to rewrite it because its ugly and unreadable and does not work really
 parseParagraph :: Parser Paragraph
-parseParagraph = return (Paragraph ("", Nothing) (Nothing) (Right "nigger"))
+parseParagraph = return (Paragraph ("", Nothing) (Nothing) (Right "nachos"))
 --------------------
 parseEmphasis :: Parser Emphasis 
 parseEmphasis = choice [try parseBold 
