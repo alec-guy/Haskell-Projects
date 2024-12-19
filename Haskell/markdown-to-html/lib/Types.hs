@@ -36,13 +36,16 @@ data Emphasis = Bold Text
               | BoldAndItalic Text 
               deriving (Show, Eq)
 
-data BlockQuote = BlockQuote (MarkDown)
-                | NestedBlockQuote (MarkDown)
+data BlockQuote = BlockQuote Text [MarkDown]
+                | NestedBlockQuote Text [MarkDown]
                 deriving (Show, Eq)
 
-data List = OrderedList [(Int, Text)] (Maybe MarkDown)
-          | UnOrderedList [(Char, Text)] (Maybe MarkDown)
+data List = Ol [OrderedList] (Maybe MarkDown)
+          | Ul [UnOrderedList] (Maybe MarkDown)
           deriving (Show, Eq)
+          
+type ListItem = OrderedList (Int, Text)
+              | UnOrderedList (Char, Text)
 
 data Image = Image Text Path  deriving (Show, Eq)
 
