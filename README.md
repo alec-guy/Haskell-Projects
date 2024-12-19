@@ -1,1 +1,4 @@
-My current haskell projects
+# My Current Haskell Projects
+
+    main :: IO () 
+    main = putStrLn "Hello Squirrel" 
