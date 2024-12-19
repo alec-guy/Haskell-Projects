@@ -184,7 +184,7 @@ parseImage :: Parser Image
 parseImage = do 
     void $ (char '!') 
     imageWords <- (between (char '[') (char ']') parseWords) 
-    path <- parsePath
+    path <- between (char '(') (char ')') parsePath
     return $ Image imageWords path 
 
 parsePath :: Parser Path 
