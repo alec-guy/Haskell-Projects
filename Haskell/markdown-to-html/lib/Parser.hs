@@ -132,7 +132,7 @@ parseListItems = do
     where f :: ListItem -> List  
           f (OrderedList tup)   = Ol [OrderedList tup] Nothing 
           f (UnorderedList tup) = Ul [UnorderedList tup] Nothing 
-          
+
 parseListItem :: Parser ListItem 
 parseListItem = do 
     let parseulChar = choice [ char '-'
@@ -140,7 +140,7 @@ parseListItem = do
                              , char '+' 
                              , char '-'
                              ]
-    numberOrSymbol <- eitherP digitChar parseulChar
+    numberOrSymbol <- eitherP (digitChar >> (char '.')) parseulChar
     case numberOrSymbol of 
         Left  num  -> do 
                        itemText <- parseWords 
