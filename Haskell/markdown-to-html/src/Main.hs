@@ -10,10 +10,10 @@ import Data.Text
 
 main :: IO ()
 main = do 
-    putStr "Enter markdown: " 
+    putStr "loading markdown..." 
     hFlush stdout 
-    pseudoMarkdown <- getLine 
-    case parse parseHeading "" (pack pseudoMarkdown) of 
+    pseudoMarkdown <- readFile "example.md"
+    case parse (parsePseudoMarkDown <* eof) "" (pack pseudoMarkdown) of 
         Left e  -> putStrLn $ errorBundlePretty e 
         Right m -> putStrLn $ show m 
     

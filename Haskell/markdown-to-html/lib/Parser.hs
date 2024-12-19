@@ -8,12 +8,10 @@ import Text.Megaparsec.Char
 import Control.Monad.Combinators 
 import Types 
 import Data.Int (Int8 (..))
-import Data.Void (Void)
 import Control.Monad (void)
+import Data.Either (isLeft)
 
 
-
-type Parser = Parsec Void Text 
 
 spaceParser :: Parser ()
 spaceParser = L.space hspace1 Text.Megaparsec.empty Text.Megaparsec.empty 
@@ -47,29 +45,52 @@ parseHeadingNumber int =
               numChar <- manyTill (alphaNumChar <|> (char ' ')) newline -- for now, but I think you can embed other symbols
               return $ heading $ (pack hash) `append` (pack numChar)
 -----------
-parseParagraph :: Parser Paragraph 
-parseParagraph = do 
-    p <- many alphaNumChar 
-    return $ Paragraph $ pack p 
+
+parseXTillY :: Parser a -> Parser b -> Parser [a] 
+parseXTillY parserX parserY = manyTill parserX parserY 
+
+parseParagraph :: Parser Paragraph
+parseParagraph = do
+    p <- manyTill_ (alphaNumChar <|> (char ' ')) (eitherP newline parseEmphasis)
+    case p of
+        (text, eithernewlineOrEmphasis) -> do
+            case eithernewlineOrEmphasis of
+                (Left _) -> do
+                    enb <- eitherP newline (parseXTillY (alphaNumChar <|> (char ' ')) newline)
+                    case enb of
+                        Left _ -> do
+                            lmarkdown <- parsePseudoMarkDown
+                            return (Paragraph (pack text, Nothing) Nothing (Left lmarkdown))
+                        Right beforebreak -> do
+                            afterbreak <- parseXTillY (alphaNumChar <|> (char ' ')) ((void newline) <|> eof)
+                            return (Paragraph (pack text, Nothing) (Just $ pack beforebreak) (Right $ pack afterbreak))
+                (Right emph) -> do
+                    enb <- eitherP newline (parseXTillY (alphaNumChar <|> (char ' ')) (eof <|> (void newline)))
+                    case enb of
+                        Left _ -> do
+                            lmarkdown <- parsePseudoMarkDown
+                            return $ Paragraph (pack text, Nothing) Nothing (Left lmarkdown)
+                        Right beforebreak -> do
+                            afterbreak <- parseXTillY (alphaNumChar <|> (char ' ')) ((void newline) <|> eof)
+                            return (Paragraph (pack text, Just emph) (Just $ pack beforebreak) (Right $ pack afterbreak))
+
 
 --------------------
 parseEmphasis :: Parser Emphasis 
-parseEmphasis = choice [parseBold 
-                       ,parseItalic
-                       ,parseBoldAndItalic
+parseEmphasis = choice [try parseBold 
+                       ,try parseItalic
+                       ,try parseBoldAndItalic
                        ]
 parseBold :: Parser Emphasis 
 parseBold = do 
   void (string "**" <|> string "__")
-  text    <- many alphaNumChar 
-  void (string "**" <|> string "__")
+  text    <- manyTill (alphaNumChar <|> (char ' ')) (void (string "**" <|> string "__"))
   return $ Bold $ pack text 
 
 parseItalic :: Parser Emphasis 
 parseItalic = do 
   void (string "*" <|> string "_")
-  text    <- many alphaNumChar 
-  void (string "*" <|> string "_")
+  text    <- manyTill (alphaNumChar <|> (char ' '))  (void (string "*" <|> string "_"))
   return $ Italic $ pack text 
 
 parseBoldAndItalic :: Parser Emphasis 

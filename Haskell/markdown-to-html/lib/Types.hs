@@ -1,6 +1,10 @@
 module Types where 
 
 import Data.Text 
+import Data.Void (Void)
+import Text.Megaparsec 
+
+type Parser = Parsec Void Text 
 
 data MarkDown = H Heading 
               | P Paragraph
@@ -19,7 +23,14 @@ data Heading = Heading1 Text
              | Heading6 Text
              deriving (Show, Eq)
 
-data Paragraph = Paragraph Text deriving (Show , Eq)
+data Paragraph = Paragraph 
+               { normal :: (Text, Maybe Emphasis)
+               , beforeBreak :: Maybe Text 
+               , afterBreak :: Either [MarkDown] Text 
+               } deriving (Show, Eq)
+
+
+
 data Emphasis = Bold Text 
               | Italic Text 
               | BoldAndItalic Text 

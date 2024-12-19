@@ -1,3 +1,3 @@
 # This is a heading 
-#### This is another heading 
-this is a paragraph
+and this is a paragraph *with something* inside
+and this is another paragraph **with bold** inside
