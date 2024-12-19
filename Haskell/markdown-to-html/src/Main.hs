@@ -13,7 +13,7 @@ main = do
     putStr "loading markdown..." 
     hFlush stdout 
     pseudoMarkdown <- readFile "example.md"
-    case parse (parsePseudoMarkDown <* eof) "" (pack pseudoMarkdown) of 
+    case parse (parseListItems <* eof) "" (pack pseudoMarkdown) of 
         Left e  -> putStrLn $ errorBundlePretty e 
         Right m -> putStrLn $ show m 
     

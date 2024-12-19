@@ -148,13 +148,13 @@ parseListItem = do
                              , char '+' 
                              , char '-'
                              ]
-    numberOrSymbol <- eitherP (digitChar >> (char '.')) parseulChar
+    numberOrSymbol <- eitherP (digitChar <* (char '.')) parseulChar
     case numberOrSymbol of 
         Left  num  -> do 
-                       itemText <- parseWords 
+                       itemText <- parseWords <* newline
                        return $ OrderedList (digitToInt num,itemText)
         Right sym  ->  do 
-                        itemText <- parseWords 
+                        itemText <- parseWords <* newline
                         return $ UnorderedList (sym,itemText)
 {-
 filter_ :: [a] -> (a -> Bool) -> ([a], [a])
