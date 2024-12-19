@@ -1,6 +1,7 @@
-1. My text
-2. Piers morgan sucks 
-3. Destiny Bonnel doesnt suck 
-- this is another item 
-- this is another item 
-5. this is another item 
+    main :: IO () 
+    main = do 
+      putStr "Enter num: "
+      hFlush stdout 
+      num <- readLn :: IO Int 
+      putStrLn  $ show $ num * 2 
+      putStrLn "Code above is doubled"

@@ -115,6 +115,7 @@ parsePseudoMarkDown = do
                                ]  
                        )
      return markdowns
+     
 parseBlockQuote :: Parser BlockQuote 
 parseBlockQuote = do 
     symbol   <- eitherP (char '>') (string ">>")
@@ -164,10 +165,16 @@ filter_ l f = do
     (is, isnt)
 -}
 ----------------------------------------------
+
+-- parseWords = pack <$> (many (alphaNumChar <|> (char ' '))) 
+-- To Parse code, we need non alphanumeric characters. such as ':' in haskell , (::) 
+-- so we must for now, use printChar until a better solution is found. 
+
 parseCode :: Parser Code 
 parseCode = do 
-   indent <- many $ (string "    " <|> (string "\t"))
-   code      <- parseWords 
+   let parsecode = pack <$> (many (printChar <|> (char ' ')))
+   indent    <- many $ (string "    " <|> (string "\t"))
+   code      <- parsecode <* newline 
    return $ Code (Data.Text.concat indent) code
 
 parseCodeBlock :: Parser [Code]
