@@ -155,8 +155,6 @@ parseListItem = do
         Right sym  ->  do 
                         itemText <- parseWords 
                         return $ UnorderedList (sym,itemText)
-
-----------------------------------------------
 {-
 filter_ :: [a] -> (a -> Bool) -> ([a], [a])
 filter_ l f = do 
@@ -164,3 +162,12 @@ filter_ l f = do
         isnt = filter (not f) l
     (is, isnt)
 -}
+----------------------------------------------
+parseCode :: Parser Code 
+parseCode = do 
+   indent <- many $ (string "    " <|> (string "\t"))
+   code      <- parseWords 
+   return $ Code (Data.Text.concat indent) code
+
+parseCodeBlock :: Parser [Code]
+parseCodeBlock = many parseCode 

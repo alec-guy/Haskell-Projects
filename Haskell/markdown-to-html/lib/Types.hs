@@ -51,5 +51,9 @@ data Image = Image Text Path  deriving (Show, Eq)
 
 newtype Path = Path Text deriving (Show, Eq)
 
-newtype Code = Code Text deriving (Show, Eq)
+data Code = Code 
+          { indentation :: Text 
+          , code :: Text 
+          } 
+          deriving (Show, Eq)
 
