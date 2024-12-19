@@ -21,6 +21,47 @@ spaceParser = L.space hspace1 Text.Megaparsec.empty Text.Megaparsec.empty
 parseWhiteSpaceAfterLexeme :: Parser a -> Parser a 
 parseWhiteSpaceAfterLexeme = L.lexeme spaceParser
 
+parseWords :: Parser Text 
+parseWords = pack <$> (many (alphaNumChar <|> (char ' ')))
+
+parseWord :: Parser Char 
+parseWord = (alphaNumChar <|> (char ' '))
+
+parsePseudoMarkDown :: Parser [MarkDown]
+parsePseudoMarkDown = do 
+     markdowns <- many (choice [ try $ H <$> parseHeading 
+                               , try $ E <$> parseEmphasis
+                               , try $ P <$> parseParagraph
+                               , try $ B <$> parseBlockQuote 
+                               , try $ L <$> parseListItems
+                               , try $ C <$> parseCodeBlock
+                               , try $ I <$> parseImage 
+                               ]  
+                       )
+     return markdowns
+
+parseParagraph :: Parser Paragraph
+parseParagraph = do 
+    (text,e) <- manyTill_ parseWord (choice [eitherP parseImage parseEmphasis
+                                            ,return ()
+                                            ]
+                                     <* 
+                                     newline 
+                                    )
+    maybeNewP <- eitherP ( void newline ) (parseParagraph)
+    case maybeNewP of 
+        (Left _)    ->  case e of 
+                         () -> return Paragraph 
+                                      { p = text 
+                                      , maybeImage = Nothing 
+                                      , maybeEmphasis = Nothing 
+                                      }
+                         imageOrEmph -> case imageOrEmph of 
+                                         
+        (Right par) -> 
+
+    
+                          
 ------------
 parseHeading :: Parser Heading 
 parseHeading = do 
@@ -46,16 +87,9 @@ parseHeadingNumber int =
               hash <- parseWhiteSpaceAfterLexeme $ Control.Monad.Combinators.count i (char' '#') 
               numChar <- manyTill (alphaNumChar <|> (char ' ')) newline -- for now, but I think you can embed other symbols
               return $ heading $ (pack hash) `append` (pack numChar)
------------
 
-wordsTillNewlineOrEmphasis = manyTill_ (alphaNumChar <|> (char ' ')) (eitherP newline parseEmphasis)
 --------------------------------------
-parseWords :: Parser Text 
-parseWords = pack <$> (many (alphaNumChar <|> (char ' ')))
----- I can't with this . i have to rewrite it because its ugly and unreadable and does not work really
-parseParagraph :: Parser Paragraph
-parseParagraph = return (Paragraph ("", Nothing) (Nothing) (Right "nachos"))
---------------------
+
 parseEmphasis :: Parser Emphasis 
 parseEmphasis = choice [try parseBold 
                        ,try parseItalic
@@ -66,12 +100,12 @@ parseBold = do
   opening <- choice [string "**"
                     ,string "__"
                     ]
-  text    <- many parseWords
+  text    <- parseWords
   closing <- choice [string "**" 
                     ,string "__"
                     ]
   case opening == closing of 
-    True ->  return $ Bold $ Data.Text.concat $ text
+    True ->  return $ Bold $ text
     _    ->  error "bold error"
 
 parseItalic :: Parser Emphasis 
@@ -79,12 +113,12 @@ parseItalic = do
   opening <- choice [string "*" 
                     ,string "_"
                     ]
-  text    <- many parseWords 
+  text    <- parseWords 
   closing <- choice [ string "*"
                     , string "_"
                     ]
   case opening == closing of 
-    True  -> return $ Italic $ Data.Text.concat $ text
+    True  -> return $ Italic $ text
     False -> error "bold error"
 
 parseBoldAndItalic :: Parser Emphasis 
@@ -105,27 +139,15 @@ parseBoldAndItalic = do
    False -> error "Bold and Italic error" 
 
 ---------------------
-parsePseudoMarkDown :: Parser [MarkDown]
-parsePseudoMarkDown = do 
-     markdowns <- many (choice [try $ H <$> parseHeading 
-                               ,try $ E <$> parseEmphasis
-                               ,try $ P <$> parseParagraph
-                               ,try $ B <$> parseBlockQuote 
-                               , try $ L <$> parseListItems
-                               ]  
-                       )
-     return markdowns
      
 parseBlockQuote :: Parser BlockQuote 
 parseBlockQuote = do 
     symbol   <- eitherP (char '>') (string ">>")
-    markdown <- parsePseudoMarkDown
+    markdown    <- parsePseudoMarkDown
     case symbol of 
         Left  s  -> return $ BlockQuote (pack [s]) markdown
-        Right ss -> return $ NestedBlockQuote ss markdown
+        Right ss -> return $ NestedBlockQuote ss markdown 
      
-
-
 ---------------------------------------
 parseListItems :: Parser [List]
 parseListItems = do 

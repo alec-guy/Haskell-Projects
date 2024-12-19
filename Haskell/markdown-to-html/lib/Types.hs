@@ -11,7 +11,7 @@ data MarkDown = H Heading
               | B BlockQuote
               | L [List]
               | I Image 
-              | C Code 
+              | C [Code] 
               | E Emphasis
               deriving (Show, Eq)
 
@@ -23,12 +23,12 @@ data Heading = Heading1 Text
              | Heading6 Text
              deriving (Show, Eq)
 
-data Paragraph = Paragraph 
-               { normal :: (Text, Maybe Emphasis)
-               , beforeBreak :: Maybe Text 
-               , afterBreak :: Either [MarkDown] Text 
-               } deriving (Show, Eq)
-
+data Paragraph = Paragraph Text 
+               { p :: Text
+               , maybeImage    :: [Maybe Image]
+               , maybeEmphasis :: [Maybe Emphasis]
+               , line2 :: Maybe Paragraph
+               }
 
 
 data Emphasis = Bold Text 
@@ -36,8 +36,8 @@ data Emphasis = Bold Text
               | BoldAndItalic Text 
               deriving (Show, Eq)
 
-data BlockQuote = BlockQuote Text [MarkDown]
-                | NestedBlockQuote Text [MarkDown]
+data BlockQuote = BlockQuote [MarkDown]
+                | NestedBlockQuote [MarkDown]
                 deriving (Show, Eq)
 
 data List = Ol [ListItem] (Maybe [MarkDown])
