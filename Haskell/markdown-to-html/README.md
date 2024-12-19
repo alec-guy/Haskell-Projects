@@ -1,6 +1,5 @@
-[haskell-flake](https://github.com/srid/haskell-flake)
+###### My Current Haskell Projects 
 
-Copied from: https://github.com/srid/haskell-flake/tree/0.4.0/example
-
-[Documentation](https://zero-to-flakes.com/haskell-flake/)
+    main :: IO 
+    main = putStrLn "Hello world!" 
 
