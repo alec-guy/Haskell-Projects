@@ -51,12 +51,10 @@ parseParagraph = do
     maybeNewP <- eitherP ( void newline ) (parseParagraph)
     case maybeNewP of 
         (Left _)    ->  case e of 
-                         () -> return Paragraph 
-                                      { p = text 
-                                      , maybeImage = Nothing 
-                                      , maybeEmphasis = Nothing 
-                                      }
+                         () -> return $ Paragraph {p = text, maybeImage = Nothing , maybeEmphasis = Nothing }
                          imageOrEmph -> case imageOrEmph of 
+                                         Left img   -> return $ Paragraph {p = text, maybeImage = Just img, maybeEmphasis = Nothing}
+                                         Right emph -> return $ Paragraph {p = text, maybeImage = Nothing, maybeEmphasis = Just emph}
                                          
         (Right par) -> 
 
