@@ -40,8 +40,8 @@ data BlockQuote = BlockQuote Text [MarkDown]
                 | NestedBlockQuote Text [MarkDown]
                 deriving (Show, Eq)
 
-data List = Ol [ListItem] (Maybe MarkDown)
-          | Ul [ListItem] (Maybe MarkDown)
+data List = Ol [ListItem] (Maybe [MarkDown])
+          | Ul [ListItem] (Maybe [MarkDown])
           deriving (Show, Eq)
 
 data ListItem = OrderedList (Int, Text)

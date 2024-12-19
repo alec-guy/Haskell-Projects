@@ -127,11 +127,18 @@ parseBlockQuote = do
 ---------------------------------------
 parseListItems :: Parser [List]
 parseListItems = do 
-    items <- many (parseListItem) 
-    return $  (f <$> items)
-    where f :: ListItem -> List  
-          f (OrderedList tup)   = Ol [OrderedList tup] Nothing 
-          f (UnorderedList tup) = Ul [UnorderedList tup] Nothing 
+    items <- many $ do 
+              item <- parseListItem 
+              e <- eitherP (string "    " <|> (string "\t")) (return [])
+              case e of 
+                Left  _ ->  do 
+                             mark <- parsePseudoMarkDown 
+                             return (item, Just mark)
+                Right _    ->  return (item, Nothing) 
+    return $ f <$> items 
+    where f :: (ListItem, Maybe [MarkDown]) -> List  
+          f ((OrderedList tup), m)  = Ol [OrderedList tup] m 
+          f ((UnorderedList tup), m) = Ul [UnorderedList tup] m
 
 parseListItem :: Parser ListItem 
 parseListItem = do 
