@@ -11,6 +11,7 @@ import Data.Int (Int8 (..))
 import Control.Monad (void)
 import Data.Either (isLeft)
 import Data.Char (digitToInt)
+import Data.List (intersperse, concat)
 
 
 
@@ -171,3 +172,16 @@ parseCode = do
 
 parseCodeBlock :: Parser [Code]
 parseCodeBlock = many parseCode 
+----------------------
+parseImage :: Parser Image 
+parseImage = do 
+    void $ (char '!') 
+    imageWords <- (between (char '[') (char ']') parseWords) 
+    path <- parsePath
+    return $ Image imageWords path 
+
+parsePath :: Parser Path 
+parsePath = do 
+    text <- sepEndBy1 (many alphaNumChar) (char '/')
+    return $ Path $ pack $ Data.List.concat $ (Data.List.intersperse "/" text) 
+--------------------------------------
