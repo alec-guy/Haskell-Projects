@@ -1,7 +1,5 @@
-###### ___My Current Haskell Projects___ 
+###### This program hopefully will one day parse markdown to html 
 
-    main :: IO 
-    main = putStrLn "Hello world!" 
-    -- This is Haskell 
-
-
+It is sort of pseudo markdown because it doesn't actually behave exactly
+like  
+markdown is supposed to behave. 
