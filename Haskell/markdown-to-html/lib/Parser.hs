@@ -88,16 +88,16 @@ parseItalic = do
 
 parseBoldAndItalic :: Parser Emphasis 
 parseBoldAndItalic = do 
-  opening <- choice [(,) 1 <$> string "***"
-                    ,(,) 2 <$> string "___"
-                    ,(,) 3 <$> string "__*"
-                    ,(,) 4 <$> string "**_"
+  opening <- choice [(,) (1 :: Int8) <$> string "***"
+                    ,(,) (2 :: Int8)  <$> string "___"
+                    ,(,) (3 :: Int8) <$> string "__*"
+                    ,(,) (4 :: Int8) <$> string "**_"
                     ]                   -- This logic also doesn't work
   text <- parseWords  
-  closing <- choice [(,) 1 <$> string "***"
-                    ,(,) 2 <$> string "___"
-                    ,(,) 3 <$> string "*__"
-                    ,(,) 4 <$> string "_**"
+  closing <- choice [(,) (1 :: Int8) <$> string "***"
+                    ,(,) (2 :: Int8) <$> string "___"
+                    ,(,) (3 :: Int8) <$> string "*__"
+                    ,(,) (4 :: Int8) <$> string "_**"
                     ]
   case (fst closing) == (fst opening) of 
    True -> return $ BoldAndItalic $ text
