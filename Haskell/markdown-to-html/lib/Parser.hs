@@ -187,8 +187,8 @@ parseImage = do
     path <- between (char '(') (char ')') parsePath
     return $ Image imageWords path 
 
-parsePath :: Parser Path 
-parsePath = do 
-    text <- sepEndBy1 (many alphaNumChar) (char '/')
-    return $ Path $ pack $ Data.List.concat $ (Data.List.intersperse "/" text) 
---------------------------------------
+parsePath :: Parser Path
+parsePath = do
+    let noParen = noneOf ['(', ')']
+    text <- sepEndBy1 (many noParen) (char '/')
+    return $ Path $ pack $ Data.List.concat $ (Data.List.intersperse "/" text)
