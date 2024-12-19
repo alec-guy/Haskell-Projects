@@ -10,6 +10,7 @@ import Types
 import Data.Int (Int8 (..))
 import Control.Monad (void)
 import Data.Either (isLeft)
+import Data.Char (digitToInt)
 
 
 
@@ -108,6 +109,8 @@ parsePseudoMarkDown = do
      markdowns <- many (choice [try $ H <$> parseHeading 
                                ,try $ E <$> parseEmphasis
                                ,try $ P <$> parseParagraph
+                               ,try $ B <$> parseBlockQuote 
+                               , try $ L <$> parseListItems
                                ]  
                        )
      return markdowns
@@ -120,24 +123,37 @@ parseBlockQuote = do
         Right ss -> return $ NestedBlockQuote ss markdown
      
 
+
+---------------------------------------
+parseListItems :: Parser [List]
+parseListItems = do 
+    items <- many (parseListItem) 
+    return $  (f <$> items)
+    where f :: ListItem -> List  
+          f (OrderedList tup)   = Ol [OrderedList tup] Nothing 
+          f (UnorderedList tup) = Ul [UnorderedList tup] Nothing 
+          
 parseListItem :: Parser ListItem 
 parseListItem = do 
+    let parseulChar = choice [ char '-'
+                             , char '*' 
+                             , char '+' 
+                             , char '-'
+                             ]
     numberOrSymbol <- eitherP digitChar parseulChar
     case numberOrSymbol of 
-        Left  num  -> itemText <- parseWords 
-                      OrderedList (num,itemText)
-        Right sym ->  itemText <- parseWords 
-                      UnOrderedList (sym,itemText)
-    where parseulChar = choice [ char '-'
-                               , char '*' 
-                               , char '+' 
-                               , char '-'
-                               ]
-praseList :: Parser List 
-parseList = do 
-    items <- many (parseListItem) 
-    return $ (foldr g [] ) <$> (f <$> items) 
-    where f :: ListItem -> List  
-          f (OrderedList li)   = Ol [li]
-          f (UnOrderedList li) = Ul [li]
-          g :: List -> 
+        Left  num  -> do 
+                       itemText <- parseWords 
+                       return $ OrderedList (digitToInt num,itemText)
+        Right sym  ->  do 
+                        itemText <- parseWords 
+                        return $ UnorderedList (sym,itemText)
+
+----------------------------------------------
+{-
+filter_ :: [a] -> (a -> Bool) -> ([a], [a])
+filter_ l f = do 
+    let is = filter f l 
+        isnt = filter (not f) l
+    (is, isnt)
+-}

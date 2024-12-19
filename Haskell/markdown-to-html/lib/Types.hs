@@ -9,7 +9,7 @@ type Parser = Parsec Void Text
 data MarkDown = H Heading 
               | P Paragraph
               | B BlockQuote
-              | L List 
+              | L [List]
               | I Image 
               | C Code 
               | E Emphasis
@@ -40,13 +40,13 @@ data BlockQuote = BlockQuote Text [MarkDown]
                 | NestedBlockQuote Text [MarkDown]
                 deriving (Show, Eq)
 
-data List = Ol [OrderedList] (Maybe MarkDown)
-          | Ul [UnOrderedList] (Maybe MarkDown)
+data List = Ol [ListItem] (Maybe MarkDown)
+          | Ul [ListItem] (Maybe MarkDown)
           deriving (Show, Eq)
-          
-type ListItem = OrderedList (Int, Text)
-              | UnOrderedList (Char, Text)
 
+data ListItem = OrderedList (Int, Text)
+              | UnorderedList (Char, Text)
+              deriving (Show, Eq)
 data Image = Image Text Path  deriving (Show, Eq)
 
 newtype Path = Path Text deriving (Show, Eq)
