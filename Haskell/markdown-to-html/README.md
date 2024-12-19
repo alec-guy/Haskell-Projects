@@ -1,6 +1,9 @@
-[haskell-flake](https://github.com/srid/haskell-flake)
+### Haskell Markdown to HTML
 
-Copied from: https://github.com/srid/haskell-flake/tree/0.4.0/example
+It is sort of pseudo markdown because it doesn't actually behave exactly
+like  
+markdown is supposed to behave.
 
-[Documentation](https://zero-to-flakes.com/haskell-flake/)
-
+I call this bad version of markdown *haskell markdown* for no reason other
+then  
+to sound cooler than it actually is.
