@@ -9,7 +9,7 @@ import Control.Monad.Combinators
 import Types 
 import Data.Int (Int8 (..))
 import Control.Monad (void)
-import Data.Either (isLeft)
+import Data.Either (isLeft, rights)
 import Data.Char (digitToInt)
 import Data.List (intersperse, concat)
 
@@ -30,9 +30,9 @@ parseWord = (alphaNumChar <|> (char ' '))
 parsePseudoMarkDown :: Parser [MarkDown]
 parsePseudoMarkDown = do 
      markdowns <- many (choice [ try $ H <$> parseHeading 
+                               -- , try $ P <$> parseParagraph
                                , try $ E <$> parseEmphasis
-                               , try $ P <$> parseParagraph
-                               , try $ B <$> parseBlockQuote 
+                               -- , try $ B <$> parseBlockQuote 
                                , try $ L <$> parseListItems
                                , try $ C <$> parseCodeBlock
                                , try $ I <$> parseImage 
@@ -40,26 +40,22 @@ parsePseudoMarkDown = do
                        )
      return markdowns
 
-parseParagraph :: Parser Paragraph
+parseParagraph :: Parser Paragraph 
 parseParagraph = do 
-    (text,e) <- manyTill_ parseWord (choice [eitherP parseImage parseEmphasis
-                                            ,return ()
-                                            ]
-                                     <* 
-                                     newline 
-                                    )
-    maybeNewP <- eitherP ( void newline ) (parseParagraph)
-    case maybeNewP of 
-        (Left _)    ->  case e of 
-                         () -> return $ Paragraph {p = text, maybeImage = Nothing , maybeEmphasis = Nothing }
-                         imageOrEmph -> case imageOrEmph of 
-                                         Left img   -> return $ Paragraph {p = text, maybeImage = Just img, maybeEmphasis = Nothing}
-                                         Right emph -> return $ Paragraph {p = text, maybeImage = Nothing, maybeEmphasis = Just emph}
-                                         
-        (Right par) -> 
+    subs <- many parseSubparagraph
+    return $ OneParagraph subs 
 
-    
-                          
+parseSubparagraph :: Parser Subparagraph 
+parseSubparagraph = do 
+    emph <- try $ observing parseEmphasis 
+    img  <- try $ observing parseImage
+    text <- parseWords <* newline 
+    return $ Subparagraph
+             {t = text 
+             ,maybeEmphasis = if  isLeft emph then [] else  rights [emph]
+             ,maybeImage    = if  isLeft img then  [] else  rights [img]
+             }
+
 ------------
 parseHeading :: Parser Heading 
 parseHeading = do 
@@ -143,8 +139,8 @@ parseBlockQuote = do
     symbol   <- eitherP (char '>') (string ">>")
     markdown    <- parsePseudoMarkDown
     case symbol of 
-        Left  s  -> return $ BlockQuote (pack [s]) markdown
-        Right ss -> return $ NestedBlockQuote ss markdown 
+        Left  s  -> return (BlockQuote markdown)
+        Right ss -> return (NestedBlockQuote markdown) 
      
 ---------------------------------------
 parseListItems :: Parser [List]

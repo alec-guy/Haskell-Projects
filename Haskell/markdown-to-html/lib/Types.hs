@@ -23,12 +23,12 @@ data Heading = Heading1 Text
              | Heading6 Text
              deriving (Show, Eq)
 
-data Paragraph = Paragraph Text 
-               { p :: Text
-               , maybeImage    :: [Maybe Image]
-               , maybeEmphasis :: [Maybe Emphasis]
-               , line2 :: Maybe Paragraph
-               }
+newtype Paragraph = OneParagraph [Subparagraph] deriving (Show, Eq)
+data Subparagraph = Subparagraph 
+                  { t :: Text 
+                  , maybeImage :: [Image]  
+                  , maybeEmphasis :: [Emphasis]
+                  } deriving (Show,Eq)
 
 
 data Emphasis = Bold Text 
