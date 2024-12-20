@@ -7,13 +7,17 @@ import Text.Megaparsec
 import Text.Megaparsec.Error
 import System.IO 
 import Data.Text
+import Text.Megaparsec.Debug
+
+
+
+
 
 main :: IO ()
 main = do 
-    putStr "loading markdown..." 
     hFlush stdout 
     pseudoMarkdown <- readFile "example.md"
-    case parse (parseImage) "" (pack pseudoMarkdown) of 
+    putStrLn "Markdown loaded"
+    case parse (parseMarkDownDocument) "" (pack pseudoMarkdown) of 
         Left e  -> putStrLn $ errorBundlePretty e 
         Right m -> putStrLn $ show m 
-    

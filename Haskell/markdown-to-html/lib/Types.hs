@@ -6,6 +6,8 @@ import Text.Megaparsec
 
 type Parser = Parsec Void Text 
 
+data Document = MKDOWN [MarkDown] deriving (Show, Eq)
+
 data MarkDown = MarkDown 
               { heading :: [Heading] 
               , paragraph ::[Paragraph] 
@@ -14,6 +16,7 @@ data MarkDown = MarkDown
               , image     ::     [Image] 
               , codeBlock :: [Code]
               , emphasis :: [Emphasis]
+              , breakk :: [Break]
               } deriving (Show, Eq)
 
 data Heading = Heading1 Text
@@ -37,8 +40,8 @@ data Emphasis = Bold Text
               | BoldAndItalic Text 
               deriving (Show, Eq)
 
-data BlockQuote = BlockQuote [MarkDown]
-                | NestedBlockQuote [MarkDown]
+data BlockQuote = BlockQuote Text 
+                | NestedBlockQuote Text 
                 deriving (Show, Eq)
 
 data List = Ol [ListItem] (Maybe [MarkDown])
@@ -58,3 +61,4 @@ data Code = Code
           } 
           deriving (Show, Eq)
 
+data Break = Break deriving (Show, Eq)

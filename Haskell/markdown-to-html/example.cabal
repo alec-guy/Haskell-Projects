@@ -12,8 +12,8 @@ common warnings
 executable example
     import:           warnings
     main-is:          Main.hs
-    other-modules:    Types, Parser
-    build-depends:    base, megaparsec, text
+    other-modules:    Types, Parser, Test
+    build-depends:    base, megaparsec, text, tasty, tasty-hunit
                       , parser-combinators
     hs-source-dirs:   src, lib
     default-language: Haskell2010

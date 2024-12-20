@@ -5,18 +5,20 @@ import Data.Text
 import Text.Megaparsec 
 import Text.Megaparsec.Char.Lexer as L
 import Text.Megaparsec.Char 
+import Text.Megaparsec.Debug
 import Control.Monad.Combinators 
 import Types 
 import Data.Int (Int8 (..))
-import Control.Monad (void)
+import Control.Monad (void, sequence_)
 import Data.Either (isLeft, rights, fromRight)
 import Data.Char (digitToInt)
 import Data.List (intersperse, concat)
 
 
 
+
 spaceParser :: Parser ()
-spaceParser = L.space hspace1 Text.Megaparsec.empty Text.Megaparsec.empty 
+spaceParser = L.space (hspace1) Text.Megaparsec.empty Text.Megaparsec.empty 
 
 parseWhiteSpaceAfterLexeme :: Parser a -> Parser a 
 parseWhiteSpaceAfterLexeme = L.lexeme spaceParser
@@ -27,39 +29,56 @@ parseWords = pack <$> (many (alphaNumChar <|> (char ' ')))
 parseWord :: Parser Char 
 parseWord = (alphaNumChar <|> (char ' '))
 
+breakParser :: Parser Break 
+breakParser = Break <$ newline 
+
+emptyMarkDown :: MarkDown -> Bool 
+emptyMarkDown mk = 
+  (Prelude.null $ heading mk) && (Prelude.null $ paragraph mk) && 
+    (Prelude.null $ codeBlock mk) && (Prelude.null $ list mk) && 
+      (Prelude.null $ image mk ) && (Prelude.null $ emphasis mk ) && (Prelude.null $ blockquote mk)
+
+parseMarkDownDocument :: Parser Document 
+parseMarkDownDocument = do 
+    markdowns <- manyTill parsePseudoMarkDown eof 
+    return $ MKDOWN markdowns -- (Prelude.filter (not . emptyMarkDown) markdowns)
+    
 parsePseudoMarkDown :: Parser MarkDown 
 parsePseudoMarkDown = do 
-   h  <- try $ observing (parseHeading) 
-   p  <-  try $ observing (parseParagraph )
-   bq <-  try $ observing (parseBlockQuote )
-   l  <-  try $ observing (parseListItems )
-   i  <-  try $ observing (parseImage )
-   c  <-  try $ observing (parseCodeBlock )
-   e  <-  try $ observing (parseEmphasis  )
+   l  <-  try $ observing (dbg "list debugger" parseListItems)
+   c  <-  try $ observing (dbg "code block debuggerr" parseCodeBlock)
+   p  <-  try $ observing (dbg "paragraph debugger" parseParagraph)
+   i  <-  try $ observing (dbg "image debugger" parseImage)
+   h  <-  try $ observing (dbg "heading debugger" parseHeading) 
+   e  <-  try $ observing (dbg "emphasis debugger" parseEmphasis)
+   bq <-  try $ observing (dbg "block quote debugger" parseBlockQuote)
+   aBreak <- try $ observing (dbg "break" breakParser)
    return MarkDown 
-          {heading    = if isLeft h then  [] else rights  [h]
-          ,paragraph  = if isLeft p then  [] else rights  [p]
-          ,blockquote = if isLeft bq then [] else rights [bq]
-          ,list       = if isLeft l then  [] else fromRight [] l 
-          ,image      = if isLeft i then  [] else rights  [i]
-          ,codeBlock  = if isLeft c then  [] else fromRight [] c
-          ,emphasis   = if isLeft e then  [] else rights  [e]
-          }
+         {heading    = if isLeft h then  [] else rights  [h]
+         , paragraph  = if isLeft p then  [] else rights  [p]
+         , blockquote = if isLeft bq then [] else rights [bq]
+         ,list       = if isLeft l then  [] else fromRight [] l 
+         ,image      = if isLeft i then  [] else rights  [i]
+         ,codeBlock  = if isLeft c then  [] else fromRight [] c
+         ,emphasis   = if isLeft e then  [] else rights  [e]
+         ,breakk      = if isLeft aBreak then [] else rights [aBreak]
+         }
    
 
 
 parseParagraph :: Parser Paragraph 
 parseParagraph = do 
-    subs <- many parseSubparagraph
+    subs   <- many parseSubparagraph
     return $ OneParagraph subs 
 
 parseSubparagraph :: Parser Subparagraph 
 parseSubparagraph = do 
+    notFollowedBy parsePseudoMarkDown
+    text <- dbg "printing char" (manyTill printChar newline)
     emph <- try $ observing (parseEmphasis)
     img  <- try $ observing (parseImage)
-    text <- parseWords <* newline 
     return $ Subparagraph
-             {t = text 
+             {t = pack text 
              ,maybeEmphasis = if  isLeft emph then [] else  rights [emph]
              ,maybeImage    = if  isLeft img then  [] else  rights [img]
              }
@@ -145,10 +164,10 @@ parseBoldAndItalic = do
 parseBlockQuote :: Parser BlockQuote 
 parseBlockQuote = do 
     symbol      <- eitherP (char '>') (string ">>")
-    markdown    <- many parsePseudoMarkDown
+    text        <- manyTill printChar newline 
     case symbol of 
-        Left  s  -> return (BlockQuote markdown)
-        Right ss -> return (NestedBlockQuote markdown) 
+        Left  s  -> return (BlockQuote $ pack text)
+        Right ss -> return (NestedBlockQuote $ pack text) 
      
 ---------------------------------------
 parseListItems :: Parser [List]
@@ -196,18 +215,23 @@ filter_ l f = do
 
 parseCode :: Parser Code 
 parseCode = do 
-   let parsecode = pack <$> (many (printChar <|> (char ' ')))
-   indent    <- many $ (string "    " <|> (string "\t"))
-   code      <- parsecode <* newline 
-   return $ Code (Data.Text.concat indent) code
-
+   let parseIndent    = (string "    " <|> (string "\t"))
+       parseCode0     = manyTill printChar newline 
+       parseNewIndent = many (char ' ' <|> char '\t')
+   indent         <- parseIndent 
+   code           <- parseCode0
+   indent2        <- parseNewIndent 
+   code2          <- parseCode0
+   return $ Code (pack indent2) (pack (code ++ "|" ++ code2)) 
 parseCodeBlock :: Parser [Code]
-parseCodeBlock = many parseCode 
+parseCodeBlock = do 
+    code <- many parseCode 
+    return code 
 ----------------------
 parseImage :: Parser Image 
 parseImage = do 
     void $ (char '!') 
-    imageWords <- (between (char '[') (char ']') (many printChar)) 
+    imageWords <- (between (char '[') (char ']') (many (noneOf ['[' , ']']))) 
     path <- between (char '(') (char ')') parsePath
     return $ Image (pack $ imageWords) path 
 
