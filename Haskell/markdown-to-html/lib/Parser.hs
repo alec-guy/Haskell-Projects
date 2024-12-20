@@ -27,18 +27,11 @@ parseWords = pack <$> (many (alphaNumChar <|> (char ' ')))
 parseWord :: Parser Char 
 parseWord = (alphaNumChar <|> (char ' '))
 
-parsePseudoMarkDown :: Parser [MarkDown]
+parsePseudoMarkDown :: Parser MarkDown 
 parsePseudoMarkDown = do 
-     markdowns <- many (choice [ try $ H <$> parseHeading 
-                               -- , try $ P <$> parseParagraph
-                               , try $ E <$> parseEmphasis
-                               -- , try $ B <$> parseBlockQuote 
-                               , try $ L <$> parseListItems
-                               , try $ C <$> parseCodeBlock
-                               , try $ I <$> parseImage 
-                               ]  
-                       )
-     return markdowns
+   maybeheader = try $ observing parseHeading
+   mayb
+
 
 parseParagraph :: Parser Paragraph 
 parseParagraph = do 
@@ -136,7 +129,7 @@ parseBoldAndItalic = do
      
 parseBlockQuote :: Parser BlockQuote 
 parseBlockQuote = do 
-    symbol   <- eitherP (char '>') (string ">>")
+    symbol      <- eitherP (char '>') (string ">>")
     markdown    <- parsePseudoMarkDown
     case symbol of 
         Left  s  -> return (BlockQuote markdown)

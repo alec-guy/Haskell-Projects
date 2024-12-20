@@ -6,14 +6,15 @@ import Text.Megaparsec
 
 type Parser = Parsec Void Text 
 
-data MarkDown = H Heading 
-              | P Paragraph
-              | B BlockQuote
-              | L [List]
-              | I Image 
-              | C [Code] 
-              | E Emphasis
-              deriving (Show, Eq)
+data MarkDown = MarkDown 
+              { heading :: Maybe Heading 
+              , paragraph :: Maybe Paragraph 
+              , blockquote :: Maybe BlockQuote
+              , list :: Maybe [List]
+              , image :: Maybe Image 
+              , code :: Maybe [Code]
+              , emphasis :: Maybe Emphasis
+              } deriving (Show, Eq)
 
 data Heading = Heading1 Text
              | Heading2 Text
