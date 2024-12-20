@@ -7,3 +7,5 @@ markdown is supposed to behave.
 I call this bad version of markdown *haskell markdown* for no reason other
 then  
 to sound cooler than it actually is.
+
+As of December 20 2024, The project is now **ABANDONED** until further notice. 
