@@ -9,7 +9,7 @@ import Control.Monad.Combinators
 import Types 
 import Data.Int (Int8 (..))
 import Control.Monad (void)
-import Data.Either (isLeft, rights)
+import Data.Either (isLeft, rights, fromRight)
 import Data.Char (digitToInt)
 import Data.List (intersperse, concat)
 
@@ -29,8 +29,23 @@ parseWord = (alphaNumChar <|> (char ' '))
 
 parsePseudoMarkDown :: Parser MarkDown 
 parsePseudoMarkDown = do 
-   maybeheader = try $ observing parseHeading
-   mayb
+   h  <- try $ observing (parseHeading ) 
+   p  <-  try $ observing (parseParagraph )
+   bq <-  try $ observing (parseBlockQuote )
+   l  <-  try $ observing (parseListItems )
+   i  <-  try $ observing (parseImage )
+   c  <-  try $ observing (parseCodeBlock )
+   e  <-  try $ observing (parseEmphasis  )
+   return MarkDown 
+          {heading    = if isLeft h then  [] else rights  [h]
+          ,paragraph  = if isLeft p then  [] else rights  [p]
+          ,blockquote = if isLeft bq then [] else rights [bq]
+          ,list       = if isLeft l then  [] else fromRight [] l 
+          ,image      = if isLeft i then  [] else rights  [i]
+          ,codeBlock  = if isLeft c then  [] else fromRight [] c
+          ,emphasis   = if isLeft e then  [] else rights  [e]
+          }
+   
 
 
 parseParagraph :: Parser Paragraph 
@@ -40,8 +55,8 @@ parseParagraph = do
 
 parseSubparagraph :: Parser Subparagraph 
 parseSubparagraph = do 
-    emph <- try $ observing parseEmphasis 
-    img  <- try $ observing parseImage
+    emph <- try $ observing (parseEmphasis <* newline)
+    img  <- try $ observing (parseImage <* newline)
     text <- parseWords <* newline 
     return $ Subparagraph
              {t = text 
@@ -130,7 +145,7 @@ parseBoldAndItalic = do
 parseBlockQuote :: Parser BlockQuote 
 parseBlockQuote = do 
     symbol      <- eitherP (char '>') (string ">>")
-    markdown    <- parsePseudoMarkDown
+    markdown    <- many parsePseudoMarkDown
     case symbol of 
         Left  s  -> return (BlockQuote markdown)
         Right ss -> return (NestedBlockQuote markdown) 
@@ -143,8 +158,8 @@ parseListItems = do
               e <- eitherP (string "    " <|> (string "\t")) (return [])
               case e of 
                 Left  _ ->  do 
-                             mark <- parsePseudoMarkDown 
-                             return (item, Just mark)
+                             marks <- many parsePseudoMarkDown 
+                             return (item, Just marks)
                 Right _    ->  return (item, Nothing) 
     return $ f <$> items 
     where f :: (ListItem, Maybe [MarkDown]) -> List  

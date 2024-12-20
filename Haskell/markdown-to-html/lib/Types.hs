@@ -7,13 +7,13 @@ import Text.Megaparsec
 type Parser = Parsec Void Text 
 
 data MarkDown = MarkDown 
-              { heading :: Maybe Heading 
-              , paragraph :: Maybe Paragraph 
-              , blockquote :: Maybe BlockQuote
-              , list :: Maybe [List]
-              , image :: Maybe Image 
-              , code :: Maybe [Code]
-              , emphasis :: Maybe Emphasis
+              { heading :: [Heading] 
+              , paragraph ::[Paragraph] 
+              , blockquote :: [BlockQuote]
+              , list :: [List]
+              , image     ::     [Image] 
+              , codeBlock :: [Code]
+              , emphasis :: [Emphasis]
               } deriving (Show, Eq)
 
 data Heading = Heading1 Text
