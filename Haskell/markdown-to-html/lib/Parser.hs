@@ -29,7 +29,7 @@ parseWord = (alphaNumChar <|> (char ' '))
 
 parsePseudoMarkDown :: Parser MarkDown 
 parsePseudoMarkDown = do 
-   h  <- try $ observing (parseHeading ) 
+   h  <- try $ observing (parseHeading) 
    p  <-  try $ observing (parseParagraph )
    bq <-  try $ observing (parseBlockQuote )
    l  <-  try $ observing (parseListItems )
@@ -55,8 +55,8 @@ parseParagraph = do
 
 parseSubparagraph :: Parser Subparagraph 
 parseSubparagraph = do 
-    emph <- try $ observing (parseEmphasis <* newline)
-    img  <- try $ observing (parseImage <* newline)
+    emph <- try $ observing (parseEmphasis)
+    img  <- try $ observing (parseImage)
     text <- parseWords <* newline 
     return $ Subparagraph
              {t = text 
@@ -87,7 +87,7 @@ parseHeadingNumber int =
     where parseH :: (Text -> Heading) -> Int -> Parser Heading 
           parseH heading i = do 
               hash <- parseWhiteSpaceAfterLexeme $ Control.Monad.Combinators.count i (char' '#') 
-              numChar <- manyTill (alphaNumChar <|> (char ' ')) newline -- for now, but I think you can embed other symbols
+              numChar <- manyTill (alphaNumChar <|> (char ' ')) (void newline <|> eof) -- for now, but I think you can embed other symbols
               return $ heading $ (pack hash) `append` (pack numChar)
 
 --------------------------------------
@@ -207,12 +207,12 @@ parseCodeBlock = many parseCode
 parseImage :: Parser Image 
 parseImage = do 
     void $ (char '!') 
-    imageWords <- (between (char '[') (char ']') parseWords) 
+    imageWords <- (between (char '[') (char ']') (many printChar)) 
     path <- between (char '(') (char ')') parsePath
-    return $ Image imageWords path 
+    return $ Image (pack $ imageWords) path 
 
 parsePath :: Parser Path
 parsePath = do
     let noParen = noneOf ['(', ')']
-    text <- sepEndBy1 (many noParen) (char '/')
+    text <- sepEndBy (many noParen) (char '/')
     return $ Path $ pack $ Data.List.concat $ (Data.List.intersperse "/" text)
