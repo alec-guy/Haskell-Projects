@@ -73,8 +73,7 @@ parseParagraph = do
 
 parseSubparagraph :: Parser Subparagraph 
 parseSubparagraph = do 
-    notFollowedBy parsePseudoMarkDown
-    text <- dbg "printing char" (manyTill printChar newline)
+    text <- dbg "printing char" $ manyTill printChar (newline <|> (void parseImage <|> (void parseEmphasis)))
     emph <- try $ observing (parseEmphasis)
     img  <- try $ observing (parseImage)
     return $ Subparagraph
