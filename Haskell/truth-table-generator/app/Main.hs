@@ -2,6 +2,8 @@ module Main where
 
 import Types 
 import Evaluator 
+import Web.Scotty 
+import Control.Exception
 
 modusPonens :: Argument 
 modusPonens = Argument 
@@ -19,6 +21,12 @@ invalidArgument = Argument
 
 main :: IO ()
 main = do 
+    {-
+    get "/PropLogic" $ do 
+        jsond <- catch (jsonData :: (ActionM PropLogicReq)) \e -> 
+                   liftIO $ putStrLn $ show (e :: SomeException)
+                   return $ PropLogicReq ""
+    -}
     putStrLn $ "Hello world"
     putStrLn $ show $ mkPropLogic modusPonens
     putStrLn $ show $ mkPropLogic invalidArgument 

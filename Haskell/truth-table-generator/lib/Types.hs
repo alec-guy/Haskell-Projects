@@ -1,6 +1,12 @@
+{-# LANGUAGE DeriveGeneric #-}
 module Types where 
 
 import Data.Aeson 
+import Data.Text 
+import Data.Aeson.KeyMap as K
+import Data.Vector as V
+import Data.Aeson.Key 
+import GHC.Generics
 
 data Proposition = Var Char Bool 
                  | And  Proposition Proposition 
@@ -18,11 +24,19 @@ data Argument = Argument
               , conclusion :: Proposition 
               } deriving (Eq, Show)
    
-data Validity = Valid | Invalid deriving (Show, Eq)
+data Validity = Valid | Invalid deriving (Show, Eq, Generic)
               
 data Soundness = Sound | Unsound deriving (Show, Eq)
 
 data PropLogic = PropLogic 
                {validity    :: Validity 
                ,cellContent :: [(String, Char)]
-               } deriving (Show, Eq)
+               } deriving (Show, Eq, Generic)
+
+data PropLogicReq = PropLogicReq 
+                  { argToParse :: String 
+                  } deriving (Show, Eq, Generic)
+    
+instance FromJSON PropLogicReq
+instance ToJSON Validity where 
+instance ToJSON PropLogic where 
