@@ -51,6 +51,19 @@ evalArgument argument = do
                             True ->  if not $ evalProp conclusion1 then return $ Invalid else return $ Valid 
                             False -> return $ Valid 
 
+
+getCellContents :: Argument -> [([Bool], Bool)]
+getCellContents argument = do 
+    let assignments = genAssignments argument 
+        assignedPremises = [(((flip assignProp) assignment) <$> (premises argument), assignProp (conclusion argument) assignment) 
+                           | assignment <- assignments
+                           ]
+    premises1Conclusion <- assignedPremises 
+    case Nothing `elem` (fst premises1Conclusion) of 
+            True  -> [] 
+            False -> return $ (evalProp <$> fromJust <$> (fst premises1Conclusion), evalProp $ fromJust $ snd premises1Conclusion)
+fromBool :: Bool -> Char 
+fromBool b = if b then '1' else '0'
 ----------------------------------------------
 assignProp :: Proposition -> [(Char,Bool)] -> Maybe Proposition
 assignProp (Var c b) assignment = do 
@@ -108,5 +121,9 @@ getVars prop =
 
 ----------------------------------------------------------
 
+mkPropLogic :: Argument -> PropLogic 
+mkPropLogic argument = PropLogic 
+                     { validity    = checkArgumentValidity argument 
+                     , cellContent = fmap (\(l,b) -> ((fromBool <$> l), fromBool b)) (getCellContents argument)
+                     }
 
-       

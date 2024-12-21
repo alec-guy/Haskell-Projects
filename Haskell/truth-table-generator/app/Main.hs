@@ -19,8 +19,8 @@ invalidArgument = Argument
 
 main :: IO ()
 main = do 
-    putStrLn $ show $ checkArgumentValidity modusPonens
-    putStrLn $ show $ checkArgumentValidity invalidArgument
-    putStrLn $ show $ checkArgumentSoundness modusPonens 
+    putStrLn $ "Hello world"
+    putStrLn $ show $ mkPropLogic modusPonens
+    putStrLn $ show $ mkPropLogic invalidArgument 
     
    
