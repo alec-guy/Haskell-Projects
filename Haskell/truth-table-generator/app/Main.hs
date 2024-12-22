@@ -2,8 +2,11 @@ module Main where
 
 import Types 
 import Evaluator 
+import Parser 
 import Web.Scotty 
 import Control.Exception
+import Text.Megaparsec
+import Text.Megaparsec.Error
 
 modusPonens :: Argument 
 modusPonens = Argument 
@@ -27,8 +30,11 @@ main = do
                    liftIO $ putStrLn $ show (e :: SomeException)
                    return $ PropLogicReq ""
     -}
+    argument <- readFile "argument.txt"
     putStrLn $ "Hello world"
-    putStrLn $ show $ mkPropLogic modusPonens
-    putStrLn $ show $ mkPropLogic invalidArgument 
+    case parse parseArgument "" argument of 
+        Left  e   -> putStrLn $ errorBundlePretty e  
+        Right arg -> putStrLn $ show $ mkPropLogic arg
+     
     
    
