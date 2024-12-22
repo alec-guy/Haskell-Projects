@@ -30,7 +30,7 @@ data Soundness = Sound | Unsound deriving (Show, Eq)
 
 data PropLogic = PropLogic 
                {validity    :: Validity 
-               ,cellContent :: [(String, Char)]
+               ,cellContent :: [(String, String)]
                } deriving (Show, Eq, Generic)
 
 data PropLogicReq = PropLogicReq 

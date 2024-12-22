@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Main where
 
 import Types 
@@ -7,6 +8,8 @@ import Web.Scotty
 import Control.Exception
 import Text.Megaparsec
 import Text.Megaparsec.Error
+import Data.Text 
+import Data.Text.Lazy
 
 modusPonens :: Argument 
 modusPonens = Argument 
@@ -24,17 +27,26 @@ invalidArgument = Argument
 
 main :: IO ()
 main = do 
-    {-
-    get "/PropLogic" $ do 
-        jsond <- catch (jsonData :: (ActionM PropLogicReq)) \e -> 
+    htmlRoot <- fromStrict <$> Data.Text.pack <$> readFile "frontend/index.html"
+    scotty 3000 $ do 
+       post "/PropLogic" $ do 
+         jsond <- Web.Scotty.catch (jsonData :: (ActionM PropLogicReq)) $ \e -> do 
                    liftIO $ putStrLn $ show (e :: SomeException)
                    return $ PropLogicReq ""
-    -}
-    argument <- readFile "argument.txt"
-    putStrLn $ "Hello world"
-    case parse parseArgument "" argument of 
-        Left  e   -> putStrLn $ errorBundlePretty e  
-        Right arg -> putStrLn $ show $ mkPropLogic arg
+         let e = parse parseArgument "" (argToParse jsond) 
+         liftIO $ putStrLn "Got /PropLogicReq"
+         liftIO $ putStrLn $ show jsond
+         case e of 
+          Left  _   -> return ()
+          Right arg -> do 
+                let proplogic = mkPropLogic arg 
+                json proplogic 
+                liftIO $ putStrLn "Sent proplogic"
+                liftIO $ putStrLn $ show proplogic
+       get "/" $ do  
+         html htmlRoot 
+         liftIO $ putStrLn "Served Root"
+
      
     
    

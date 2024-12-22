@@ -50,12 +50,15 @@ parseArgument = lexemeP $ do
     return $ Argument premises1 conclusoin1
 
 table :: [[Operator ArgParser Proposition]]
-table = [ [ Prefix  (Not <$ choice ((lexemeP . string) <$>  ["~"]))
+table = [ [ Prefix  (Not <$ choice ((lexemeP . string) <$>  ["~", "¬", "!"]))
           ]
-        , [ InfixL  (And <$ choice ((lexemeP . string) <$>  ["&&"]))
-          , InfixL  (If <$ choice ((lexemeP . string) <$>  ["->"])) 
+        , [ InfixL  (And <$ choice ((lexemeP . string) <$>  ["&", "∧", "·"]))
+          , InfixL  (If <$ choice ((lexemeP . string) <$>  ["->", "⇒", "→", "⊃"])) 
           ]
-        , [ InfixL  (Iff <$ choice ((lexemeP . string) <$>  ["<->"])) 
-          , InfixL  (Or <$ choice ((lexemeP . string) <$>  ["||"]))
+        , [ InfixL  (Iff <$ choice ((lexemeP . string) <$>  ["<->","⇔", "↔", "≡"])) 
+          , InfixL  (Or <$ choice ((lexemeP . string) <$>  ["∥", "∨", "+", "||"]))
+          , InfixL  (Nor <$ choice ((lexemeP . string) <$>  ["⊽"]))
+          , InfixL  (Xor <$ choice ((lexemeP . string) <$>  ["⊕", "⊻", "↮", "≢"]))
+          , InfixL  (Nand <$ choice ((lexemeP . string) <$>  ["⊼"]))
           ] 
         ]
