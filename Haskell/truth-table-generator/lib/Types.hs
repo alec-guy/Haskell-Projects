@@ -8,7 +8,7 @@ import Data.Vector as V
 import Data.Aeson.Key 
 import GHC.Generics
 
-data Proposition = Var Char Bool 
+data Proposition = Var Char  
                  | And  Proposition Proposition 
                  | Or   Proposition Proposition
                  | Iff  Proposition Proposition

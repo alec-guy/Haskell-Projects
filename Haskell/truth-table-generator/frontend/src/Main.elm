@@ -45,7 +45,6 @@ view model = div
              , br [] []
              , button [onClick Submit] [text "submit"]
              , br [] []
-             , text <| Tuple.first <| (Maybe.withDefault ("", "")) <| List.head <| model.argumentBackend.cellContent
              , br [] []
              , text model.argumentBackend.validity
              ]
@@ -55,14 +54,14 @@ view model = div
 makeTable : List String -> Argument -> Html Msg 
 makeTable argfrontend argbackend = 
       table 
-      [] 
+      [id "truth-table"] 
       (
       [ tr 
         [] 
         (makeTableHeaders argfrontend)
       ] 
       ++ 
-      (makeTableRows 0 argbackend)
+      (makeTableRows 1 argbackend)
       )
      
 makeTableHeaders : List String -> List (Html Msg)
@@ -76,7 +75,8 @@ makeTableRows i argum =
     case i > (List.length argum.cellContent) of 
      True  -> [] 
      False -> (tr 
-               [] 
+               [style "border-bottom" "1px solid #ddd"
+               ]  
                (makeTableData argum.cellContent)
               )
               ::
@@ -125,6 +125,9 @@ argumentDecoder : Decoder Argument
 argumentDecoder = 
    map2 Argument
    (D.field "validity" D.string)
-   (D.field "cellContent" (D.keyValuePairs D.string))
+   (D.field "cellContent" (D.list (D.map2 Tuple.pair 
+        (D.index 0 D.string)
+        (D.index 1 D.string))))
+-- The only thing i used AI for was argumentDecoder and that's it
 
 subscriptions _ = Sub.none

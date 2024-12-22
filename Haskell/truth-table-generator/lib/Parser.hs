@@ -22,7 +22,7 @@ parens :: ArgParser a -> ArgParser a
 parens = between (string "(") (string ")")
 
 parseVar :: ArgParser Proposition
-parseVar = lexemeP (((\c -> Var c True) <$> upperChar) <?> "var")
+parseVar = lexemeP ((Var <$> upperChar) <?> "var")
 
 expression :: ArgParser Proposition 
 expression = lexemeP (makeExprParser parseTerm table <?> "expression")

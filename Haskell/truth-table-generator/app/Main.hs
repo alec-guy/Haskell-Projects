@@ -10,6 +10,7 @@ import Text.Megaparsec
 import Text.Megaparsec.Error
 import Data.Text 
 import Data.Text.Lazy
+import Network.Wai.Middleware.Static
 
 modusPonens :: Argument 
 modusPonens = Argument 
@@ -28,7 +29,8 @@ invalidArgument = Argument
 main :: IO ()
 main = do 
     htmlRoot <- fromStrict <$> Data.Text.pack <$> readFile "frontend/index.html"
-    scotty 3000 $ do 
+    scotty 3000 $ do
+       middleware (staticPolicy (addBase "frontend"))
        post "/PropLogic" $ do 
          jsond <- Web.Scotty.catch (jsonData :: (ActionM PropLogicReq)) $ \e -> do 
                    liftIO $ putStrLn $ show (e :: SomeException)
