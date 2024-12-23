@@ -34,7 +34,7 @@ type alias Model =
 
 view : Model -> Html Msg 
 view model = div 
-             [style "text-align" "center"] 
+             [style "text-align" "center", class "main-div"] 
              [h1 [] [text "Truth Table Generator"]
              , br [] []
              ,textarea [onInput <| GetArgument] []
@@ -70,41 +70,42 @@ makeTableHeaders : List String -> List (Html Msg)
 makeTableHeaders headers = 
     case headers of 
      []        -> [] 
-     (h :: hs) -> (th [] [text h]) :: (makeTableHeaders hs)
+     (h :: hs) -> (th [class "table-header"] [text h]) :: (makeTableHeaders hs)
+
 makeTableRows : Argument -> List (Html Msg)
 makeTableRows arg = 
-        case arg.varAssignments of 
-         [] -> case arg.cellContent of 
-                [] -> [] 
-                (firstRow :: otherRows) -> 
-                   tr [] (makeData "" firstRow NoVars) :: (makeTableRows {arg | cellContent = otherRows})
-         (rowVar :: rowVars) -> 
-              tr [] (makeData rowVar ("","") PutVars) :: (makeTableRows {arg | varAssignments = rowVars})
-
-type Vars = NoVars | PutVars 
-
-makeData : String -> (String, String) -> Vars -> List (Html Msg) 
-makeData s t v = 
-      case v of 
-       NoVars -> case t of 
-                  (premises, conclusionEval) -> 
-                    case String.toList premises of 
-                     [] -> [td [] [text conclusionEval]]
-                     (firstPremise :: otherPremises) -> 
-                         (td [] [text <| String.fromChar <| firstPremise]) 
-                         :: 
-                         (makeData "" ((String.fromList otherPremises), conclusionEval) NoVars)
-       PutVars -> case String.toList s of 
-                   [] -> [] 
-                   (var :: vars) -> 
-                      (td [] [text <| String.fromChar var])
-                      :: 
-                      (makeData (String.fromList <| (Maybe.withDefault []) <| (List.tail (String.toList s))) ("", "") PutVars)
-
-          
-
------------------------------------------------------------------------------
-
+       let myTuple = (arg.varAssignments, arg.cellContent)
+       in case (List.isEmpty (Tuple.first myTuple) && List.isEmpty (Tuple.second myTuple)) of 
+           True   -> [] 
+           False  -> 
+            case myTuple of 
+             (varAssignmentss, cellContents) -> 
+                tr [class "table-row"] ((makeDataVar varAssignmentss) ++ (makeDataContent cellContents))
+                :: 
+                (makeTableRows <| {arg | varAssignments = (Maybe.withDefault []) <| (List.tail arg.varAssignments)
+                                  ,cellContent = (Maybe.withDefault []) <| (List.tail arg.cellContent)
+                                  }
+                )
+makeDataVar : List String -> List (Html Msg)
+makeDataVar l = 
+   case l of 
+    (oneone :: onetwo) -> 
+       case String.toList oneone of 
+         (b :: bs) -> 
+           (td [class "table-data"] [text <| String.fromChar b]) :: (makeDataVar ((String.fromList bs) :: onetwo))
+         []        -> []
+    []                -> [] 
+makeDataContent : List (String, String) -> List (Html Msg)
+makeDataContent l = 
+    case l of 
+     (t :: ts) -> 
+         case t of 
+          (premiseEvals, conclusionEval) -> 
+               case String.toList premiseEvals of 
+                 (b :: bs) -> 
+                  (td [class "table-data"] [text <| String.fromChar b]) :: (makeDataContent <| ((String.fromList bs, conclusionEval) :: ts))
+                 [] -> [(td [class "table-data"] [text conclusionEval])]
+     []        -> [] 
 -------------------
 type Msg = GotArgument (Result Http.Error Argument)
          | GetArgument String 

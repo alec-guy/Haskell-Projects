@@ -125,7 +125,7 @@ evalPropAt (Nand p p2) assignments      = do
 
 getAssignments :: Argument -> [[Assignment]]
 getAssignments argument = do 
-      let vars           = getVars (premises argument)
+      let vars           = getVars ((premises argument) ++ [conclusion argument])
       (zip vars) <$> (replicateM (length vars) [True, False])
 
 getVars :: [Proposition] -> String 
