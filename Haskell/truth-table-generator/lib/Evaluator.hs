@@ -19,20 +19,25 @@ modusponens = Argument [If (Var 'P') (Var 'Q'), Var 'P'] (Var 'Q')
 mkPropLogic :: Argument -> PropLogic
 mkPropLogic arg = PropLogic 
                 {validity = computeValidity arg 
-                ,cellContent = getCellContent arg 
+                ,cellContent = getCellContent arg
                 }
 showMaybeBool :: Maybe Bool ->  String 
 showMaybeBool Nothing = ""
 showMaybeBool (Just b) = if b then "1" else "0"
 
-getCellContent :: Argument -> [(String, String)]
+getCellContent :: Argument -> [(String,String)]
 getCellContent arg = 
-       let prem = premises arg 
-           conc             = conclusion arg 
-           assignments      = getAssignments arg 
-           cellContentProto =  [(evalPropAt prop assignment) | prop <- prem, assignment <- assignments]
-           cellContentProto2 = [(evalPropAt conc assignment)| assignment <- assignments]
-       in (\(assignment, b) -> (showMaybeBool b, showMaybeBool $ evalPropAt conc assignment)) <$> cellContentProto
+       let prem              = premises arg 
+           conc              = conclusion arg 
+           assignments       = getAssignments arg 
+           cellContentProto  = [( assignment, (((flip evalPropAt) assignment) <$> prem)) | assignment <- assignments]
+           cellContents      = swap <$> [(showMaybeBool (evalPropAt conc assignment)
+                                         , concat $ showMaybeBool <$> premiseEvals
+                                         ) 
+                                        | (assignment, premiseEvals) <- cellContentProto 
+                                        ]
+       in cellContents
+       
 
 computeValidity :: Argument -> Validity 
 computeValidity arg = 

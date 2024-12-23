@@ -54,14 +54,14 @@ view model = div
 makeTable : List String -> Argument -> Html Msg 
 makeTable argfrontend argbackend = 
       table 
-      [id "truth-table"] 
+      [class "truth-table"] 
       (
       [ tr 
         [] 
         (makeTableHeaders argfrontend)
       ] 
       ++ 
-      (makeTableRows 1 argbackend)
+      (makeTableRows argbackend)
       )
      
 makeTableHeaders : List String -> List (Html Msg)
@@ -69,29 +69,26 @@ makeTableHeaders headers =
     case headers of 
      []        -> [] 
      (h :: hs) -> (th [] [text h]) :: (makeTableHeaders hs)
+makeTableRows : Argument -> List (Html Msg)
+makeTableRows arg = 
+        case arg.cellContent of 
+         [] -> [] 
+         (firstRow :: otherRows) -> 
+              tr [] (makeData firstRow) :: (makeTableRows {arg | cellContent = otherRows})
+makeData : (String, String) -> List (Html Msg) 
+makeData t = 
+      case t of 
+       (premises, conclusionEval) -> 
+               case String.toList premises of 
+                [] -> [td [] [text conclusionEval]]
+                (firstPremise :: otherPremises) -> 
+                    (td [] [text <| String.fromChar <| firstPremise]) 
+                    :: 
+                    (makeData ((String.fromList otherPremises), conclusionEval))
+       
 
-makeTableRows : Int -> Argument -> List (Html Msg)
-makeTableRows i argum = 
-    case i > (List.length argum.cellContent) of 
-     True  -> [] 
-     False -> (tr 
-               [style "border-bottom" "1px solid #ddd"
-               ]  
-               (makeTableData argum.cellContent)
-              )
-              ::
-              (makeTableRows (i + 1) argum)
+          
 
-makeTableData : List (String, String) -> List (Html Msg)
-makeTableData l = 
-   case l of 
-    [] -> [] 
-    (t :: ts) -> (g t) ++ (makeTableData ts)
-
-g : (String, String) -> List (Html Msg)
-g t = case (String.toList <| Tuple.first t) of 
-         []         -> [td [] [text <| Tuple.second t]]
-         (b :: bs)  -> [td [] [text <| String.fromChar <| b]] ++  (g (String.fromList bs, Tuple.second t))
 -----------------------------------------------------------------------------
 
 -------------------
