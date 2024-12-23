@@ -30,7 +30,8 @@ getCellContent arg =
        let prem = premises arg 
            conc             = conclusion arg 
            assignments      = getAssignments arg 
-           cellContentProto = [(assignment, evalPropAt prop assignment) | prop <- prem, assignment <- assignments]
+           cellContentProto =  [(evalPropAt prop assignment) | prop <- prem, assignment <- assignments]
+           cellContentProto2 = [(evalPropAt conc assignment)| assignment <- assignments]
        in (\(assignment, b) -> (showMaybeBool b, showMaybeBool $ evalPropAt conc assignment)) <$> cellContentProto
 
 computeValidity :: Argument -> Validity 
