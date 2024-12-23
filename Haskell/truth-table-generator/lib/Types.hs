@@ -29,8 +29,10 @@ data Validity = Valid | Invalid deriving (Show, Eq, Generic)
 data Soundness = Sound | Unsound deriving (Show, Eq)
 
 data PropLogic = PropLogic 
-               {validity    :: Validity 
-               ,cellContent :: [(String, String)]
+               {validity       :: Validity 
+               ,cellContent    :: [(String, String)]
+               ,vars           :: [String]
+               ,varAssignments :: [String]
                } deriving (Show, Eq, Generic)
 
 data PropLogicReq = PropLogicReq 

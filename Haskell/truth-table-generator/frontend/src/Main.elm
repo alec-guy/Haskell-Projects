@@ -20,7 +20,7 @@ main = Browser.element
 
 initModel = { argumentFrontend = []
             , loading = False
-            , argumentBackend = {validity = "", cellContent = []}
+            , argumentBackend = {validity = "", cellContent = [], vars = [], varAssignments = []}
             , argumentFrontendUnParsed = ""
             }
 init _    = (initModel,Cmd.none)
@@ -34,8 +34,8 @@ type alias Model =
 
 view : Model -> Html Msg 
 view model = div 
-             [style "text-align" "center", style "background-color" "red"] 
-             [h4 [] [text "Truth Table Generator"]
+             [style "text-align" "center"] 
+             [h1 [] [text "Truth Table Generator"]
              , br [] []
              ,textarea [onInput <| GetArgument] []
              , br [] []
@@ -53,12 +53,14 @@ view model = div
 -- Making table
 makeTable : List String -> Argument -> Html Msg 
 makeTable argfrontend argbackend = 
+      let vars = argbackend.vars 
+      in 
       table 
       [class "truth-table"] 
       (
       [ tr 
         [] 
-        (makeTableHeaders argfrontend)
+        (makeTableHeaders (vars ++ (argfrontend)))
       ] 
       ++ 
       (makeTableRows argbackend)
@@ -71,21 +73,33 @@ makeTableHeaders headers =
      (h :: hs) -> (th [] [text h]) :: (makeTableHeaders hs)
 makeTableRows : Argument -> List (Html Msg)
 makeTableRows arg = 
-        case arg.cellContent of 
-         [] -> [] 
-         (firstRow :: otherRows) -> 
-              tr [] (makeData firstRow) :: (makeTableRows {arg | cellContent = otherRows})
-makeData : (String, String) -> List (Html Msg) 
-makeData t = 
-      case t of 
-       (premises, conclusionEval) -> 
-               case String.toList premises of 
-                [] -> [td [] [text conclusionEval]]
-                (firstPremise :: otherPremises) -> 
-                    (td [] [text <| String.fromChar <| firstPremise]) 
-                    :: 
-                    (makeData ((String.fromList otherPremises), conclusionEval))
-       
+        case arg.varAssignments of 
+         [] -> case arg.cellContent of 
+                [] -> [] 
+                (firstRow :: otherRows) -> 
+                   tr [] (makeData "" firstRow NoVars) :: (makeTableRows {arg | cellContent = otherRows})
+         (rowVar :: rowVars) -> 
+              tr [] (makeData rowVar ("","") PutVars) :: (makeTableRows {arg | varAssignments = rowVars})
+
+type Vars = NoVars | PutVars 
+
+makeData : String -> (String, String) -> Vars -> List (Html Msg) 
+makeData s t v = 
+      case v of 
+       NoVars -> case t of 
+                  (premises, conclusionEval) -> 
+                    case String.toList premises of 
+                     [] -> [td [] [text conclusionEval]]
+                     (firstPremise :: otherPremises) -> 
+                         (td [] [text <| String.fromChar <| firstPremise]) 
+                         :: 
+                         (makeData "" ((String.fromList otherPremises), conclusionEval) NoVars)
+       PutVars -> case String.toList s of 
+                   [] -> [] 
+                   (var :: vars) -> 
+                      (td [] [text <| String.fromChar var])
+                      :: 
+                      (makeData (String.fromList <| (Maybe.withDefault []) <| (List.tail (String.toList s))) ("", "") PutVars)
 
           
 
@@ -96,7 +110,7 @@ type Msg = GotArgument (Result Http.Error Argument)
          | GetArgument String 
          | Submit
 
-type alias Argument = {validity : String, cellContent : List (String, String)}
+type alias Argument = {validity : String, cellContent : List (String, String), vars : List String, varAssignments : List String}
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = 
@@ -120,11 +134,13 @@ sendArgument model = post
                    }
 argumentDecoder : Decoder Argument 
 argumentDecoder = 
-   map2 Argument
+   map4 Argument
    (D.field "validity" D.string)
    (D.field "cellContent" (D.list (D.map2 Tuple.pair 
         (D.index 0 D.string)
         (D.index 1 D.string))))
+   (D.field "vars" (D.list D.string))
+   (D.field "varAssignments" (D.list D.string))
 -- The only thing i used AI for was argumentDecoder and that's it
 
 subscriptions _ = Sub.none

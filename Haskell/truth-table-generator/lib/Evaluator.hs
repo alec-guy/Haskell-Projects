@@ -1,9 +1,8 @@
-{-# LANGUAGE OverloadedStrings #-}
 
 module Evaluator where 
 
 import Types
-import Data.List (nub, splitAt, null)
+import Data.List (nub, splitAt, null, last, singleton)
 import Control.Monad (replicateM)
 import Data.Maybe (fromJust)
 import Data.Tuple (swap)
@@ -17,9 +16,13 @@ toPossibleWorld = PossibleWorld
 modusponens = Argument [If (Var 'P') (Var 'Q'), Var 'P'] (Var 'Q')
 
 mkPropLogic :: Argument -> PropLogic
-mkPropLogic arg = PropLogic 
-                {validity = computeValidity arg 
-                ,cellContent = getCellContent arg
+mkPropLogic arg = 
+            let vars = getVars $ (premises arg) ++ [conclusion arg]
+            in  PropLogic 
+                {validity        = computeValidity arg 
+                ,cellContent     = getCellContent arg
+                , vars           =  singleton <$> vars 
+                , varAssignments =  ((<$>) (\b -> if b then '1' else '0')) <$> (replicateM (length vars) [True,False])
                 }
 showMaybeBool :: Maybe Bool ->  String 
 showMaybeBool Nothing = ""
@@ -36,6 +39,7 @@ getCellContent arg =
                                          ) 
                                         | (assignment, premiseEvals) <- cellContentProto 
                                         ]
+
        in cellContents
        
 
