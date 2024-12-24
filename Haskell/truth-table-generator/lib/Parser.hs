@@ -46,7 +46,7 @@ parseConclusion = lexemeP $ do
 
 parseArgument :: ArgParser Argument 
 parseArgument = lexemeP $ do 
-    (premises1 , conclusoin1) <- manyTill_ parsePremise parseConclusion
+    (premises1 , conclusoin1) <- someTill_ parsePremise parseConclusion
     return $ Argument premises1 conclusoin1
 
 table :: [[Operator ArgParser Proposition]]
@@ -62,3 +62,6 @@ table = [ [ Prefix  (Not <$ choice ((lexemeP . string) <$>  ["~", "¬", "!"]))
           , InfixL  (Nand <$ choice ((lexemeP . string) <$>  ["⊼"]))
           ] 
         ]
+
+parseEitherArgOrExpression :: ArgParser (Either Argument Proposition)
+parseEitherArgOrExpression = eitherP ( try parseArgument ) expression

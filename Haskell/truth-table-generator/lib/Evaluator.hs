@@ -19,7 +19,7 @@ mkPropLogic :: Argument -> PropLogic
 mkPropLogic arg = 
             let vars = getVars $ (premises arg) ++ [conclusion arg]
             in  PropLogic 
-                {validity        = computeValidity arg 
+                {validity        = Just $ computeValidity arg 
                 ,cellContent     = getCellContent arg
                 , vars           =  singleton <$> vars 
                 , varAssignments =  ((<$>) (\b -> if b then '1' else '0')) <$> (replicateM (length vars) [True,False])
@@ -42,7 +42,21 @@ getCellContent arg =
 
        in cellContents
        
-
+evaluateArgOrProp :: Either Argument Proposition -> PropLogic 
+evaluateArgOrProp ap = 
+    case ap of 
+        Left arg   -> mkPropLogic arg 
+        Right prop -> let vars' = getVars [prop]
+                          assmints = (replicateM (length vars') [True,False])
+                          assignments' = ((zip vars') <$> assmints)  :: [[Assignment]]
+                      in 
+                      PropLogic 
+                      { validity       = Nothing 
+                      , cellContent    = 
+                           [(showMaybeBool (evalPropAt prop assignment), "") | assignment <- assignments']
+                      , vars = singleton <$> vars'
+                      , varAssignments = ((<$>) (\b -> if b then '1' else '0')) <$> assmints 
+                      }
 computeValidity :: Argument -> Validity 
 computeValidity arg = 
      let assignments = getAssignments arg 

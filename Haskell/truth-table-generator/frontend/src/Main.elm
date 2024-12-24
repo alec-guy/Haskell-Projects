@@ -20,9 +20,10 @@ main = Browser.element
 
 initModel = { argumentFrontend = []
             , loading = False
-            , argumentBackend = {validity = "", cellContent = [], vars = [], varAssignments = []}
+            , argumentBackend = {validity = Nothing, cellContent = [], vars = [], varAssignments = []}
             , argumentFrontendUnParsed = ""
-            , copiedButton = False
+            , copiedButton = ' '
+            , error = ""
             }
 init _    = (initModel,Cmd.none)
 
@@ -31,7 +32,8 @@ type alias Model =
                  ,loading           : Bool 
                  ,argumentBackend   : Argument
                  ,argumentFrontendUnParsed : String
-                 ,copiedButton : Bool 
+                 ,copiedButton : Char 
+                 , error : String 
                  }
 
 view : Model -> Html Msg 
@@ -43,17 +45,19 @@ view model = div
              , br [] []
              , text <| if model.loading then "loading..." else ""
              , br [] []
-             , if model.argumentFrontend == [] then text "invalid input" else makeTable model.argumentFrontend model.argumentBackend
+             , if model.argumentFrontend == [] then text "" else makeTable model.argumentFrontend model.argumentBackend
              , br [] []
              , button [onClick Submit] [text "submit"]
              , br [] []
              , br [] []
-             , text model.argumentBackend.validity
+             , text<| (Maybe.withDefault "") <| model.argumentBackend.validity
              , br [] [] 
              , br [] []
              , keyboard
              , br [] [] 
-             , if model.copiedButton then text "copied!" else text ""
+             , text <| String.fromChar model.copiedButton
+             , br [] [] 
+             , text <| model.error
              , h4 [] [text "By Alec-Guy"]
              ]
 keyboard : Html Msg 
@@ -67,6 +71,7 @@ keyboard = div
             ,button [class "myCopy", onClick <| Copy "∨"] [text "∨"]
             ,button [class "myCopy", onClick <| Copy "⊕"] [text "⊕"]
             ,button [class "myCopy", onClick <| Copy "⊼"] [text "⊼"]
+            ,button [class "myCopy", onClick <| Copy "⊽"] [text "⊽"]
             ,button [class "myCopy", onClick <| Copy "∴"] [text "∴"]
            ]
 ------------------------
@@ -125,7 +130,9 @@ makeDataContent l =
                case String.toList premiseEvals of 
                  (b :: bs) -> 
                   (td [class "table-data"] [text <| String.fromChar b]) :: (makeDataContent <| ((String.fromList bs, conclusionEval) :: ts))
-                 [] -> [(td [class "table-data"] [text conclusionEval])]
+                 [] -> case conclusionEval of 
+                        "" -> [] 
+                        _  -> [(td [class "table-data"] [text conclusionEval])]
      []        -> [] 
 -------------------
 type Msg = GotArgument (Result Http.Error Argument)
@@ -133,21 +140,34 @@ type Msg = GotArgument (Result Http.Error Argument)
          | Submit
          | Copy String 
 
-type alias Argument = {validity : String, cellContent : List (String, String), vars : List String, varAssignments : List String}
+type alias Argument = { validity : Maybe String
+                      , cellContent : List (String, String)
+                      , vars : List String
+                      , varAssignments : List String
+                      }
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = 
   case msg of 
    (GotArgument r) -> 
        case r of 
-        (Ok a)   -> ({model | argumentBackend = a, loading = False, copiedButton = False}, Cmd.none)
-        (Err _ ) -> ({model | argumentFrontend = [], loading = False, copiedButton = False}, Cmd.none)
+        (Ok a)   -> ({model | argumentBackend = a, loading = False}, Cmd.none)
+        (Err err) -> 
+           case err of 
+            BadUrl s ->  ({model | argumentFrontend = [], loading = False, error = s}, Cmd.none)
+            Timeout -> ({model | argumentFrontend = [], loading = False, error = "Timeout"}, Cmd.none)
+            NetworkError -> ({model | argumentFrontend = [], loading = False, error = "NetworkError"}, Cmd.none)
+            BadStatus i -> ({model | argumentFrontend = [], loading = False, error = "Bad Status " ++ (String.fromInt i)}, Cmd.none)
+            BadBody s -> ({model | argumentFrontend = [], loading = False, error = s}, Cmd.none)
    (GetArgument s) -> 
-       ({model | argumentFrontendUnParsed = s, loading = False, copiedButton = False}, Cmd.none)
+       ({model | argumentFrontendUnParsed = s, loading = False}, Cmd.none)
    Submit         ->  
-        ({model | loading = True, argumentFrontend = (String.lines model.argumentFrontendUnParsed), copiedButton = False}, sendArgument model)
-   (Copy s) -> ({model | copiedButton = True},sendMessage s)
+        ({model | loading = True, argumentFrontend = (String.lines model.argumentFrontendUnParsed)}, sendArgument model)
+   (Copy s) -> ({model | copiedButton = toChar s},sendMessage s)
    
+toChar : String -> Char 
+toChar s = (Maybe.withDefault ' ') <| List.head <| String.toList  s 
+     
 ----------
 
 sendArgument : Model -> Cmd Msg 
@@ -159,12 +179,12 @@ sendArgument model = post
 argumentDecoder : Decoder Argument 
 argumentDecoder = 
    map4 Argument
-   (D.field "validity" D.string)
+   (D.field "validity" (D.nullable D.string))
    (D.field "cellContent" (D.list (D.map2 Tuple.pair 
         (D.index 0 D.string)
         (D.index 1 D.string))))
    (D.field "vars" (D.list D.string))
    (D.field "varAssignments" (D.list D.string))
--- The only thing i used AI for was argumentDecoder and that's it
+-- The only thing i used AI for was argumentDecoder the cellContent portion  and that's it
 
 subscriptions _ = Sub.none

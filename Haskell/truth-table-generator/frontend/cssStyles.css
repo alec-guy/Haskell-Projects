@@ -24,13 +24,11 @@
 .main-div {
     background-color: #dce0e8;
     border: 5px solid #000000;
+    height: 100vh;
+    width: 100vw;
 }
 
-.myCopy {
-    border: 5px solid #000000;
-}
 
 .keyboard {
     background-color: #bcc0cc;
-    border-style: solid;
 }

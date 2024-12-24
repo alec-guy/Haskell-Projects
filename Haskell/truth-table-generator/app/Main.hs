@@ -22,13 +22,13 @@ main = do
          jsond <- Web.Scotty.catch (jsonData :: (ActionM PropLogicReq)) $ \e -> do 
                    liftIO $ putStrLn $ show (e :: SomeException)
                    return $ PropLogicReq ""
-         let e = parse parseArgument "" (argToParse jsond) 
+         let e = parse parseEitherArgOrExpression "" (argToParse jsond) 
          liftIO $ putStrLn "Got /PropLogicReq"
          liftIO $ putStrLn $ show jsond
          case e of 
           Left  _   -> return ()
-          Right arg -> do 
-                let proplogic = mkPropLogic arg 
+          Right earg -> do 
+                let proplogic = evaluateArgOrProp earg
                 json proplogic 
                 liftIO $ putStrLn "Sent proplogic"
                 liftIO $ putStrLn $ show proplogic
