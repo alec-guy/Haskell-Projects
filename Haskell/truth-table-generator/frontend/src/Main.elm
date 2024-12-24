@@ -1,4 +1,4 @@
-module Main exposing (..)
+port module Main exposing (..)
 
 import Http exposing (..)
 import Json.Decode as D  exposing (..)
@@ -8,7 +8,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Browser 
 
-
+port sendMessage : String -> Cmd msg 
 
 main : Program () Model Msg 
 main = Browser.element 
@@ -22,6 +22,7 @@ initModel = { argumentFrontend = []
             , loading = False
             , argumentBackend = {validity = "", cellContent = [], vars = [], varAssignments = []}
             , argumentFrontendUnParsed = ""
+            , copiedButton = False
             }
 init _    = (initModel,Cmd.none)
 
@@ -30,25 +31,44 @@ type alias Model =
                  ,loading           : Bool 
                  ,argumentBackend   : Argument
                  ,argumentFrontendUnParsed : String
+                 ,copiedButton : Bool 
                  }
 
 view : Model -> Html Msg 
 view model = div 
              [style "text-align" "center", class "main-div"] 
-             [h1 [] [text "Truth Table Generator"]
+             [h1 [class "heading"] [text "Truth Table"]
              , br [] []
-             ,textarea [onInput <| GetArgument] []
+             ,textarea [class "textarea", onInput <| GetArgument] []
              , br [] []
              , text <| if model.loading then "loading..." else ""
              , br [] []
-             , makeTable model.argumentFrontend model.argumentBackend
+             , if model.argumentFrontend == [] then text "invalid input" else makeTable model.argumentFrontend model.argumentBackend
              , br [] []
              , button [onClick Submit] [text "submit"]
              , br [] []
              , br [] []
              , text model.argumentBackend.validity
+             , br [] [] 
+             , br [] []
+             , keyboard
+             , br [] [] 
+             , if model.copiedButton then text "copied!" else text ""
+             , h4 [] [text "By Alec-Guy"]
              ]
-
+keyboard : Html Msg 
+keyboard = div 
+           [class "keyboard"] 
+           [
+             button [class "myCopy", onClick <| Copy "→"] [text "→"]
+            ,button [class "myCopy", onClick <| Copy "↔"] [text "↔"]
+            ,button [class "myCopy", onClick <| Copy "¬"] [text "¬"]
+            ,button [class "myCopy", onClick <| Copy "∧"] [text "∧"]
+            ,button [class "myCopy", onClick <| Copy "∨"] [text "∨"]
+            ,button [class "myCopy", onClick <| Copy "⊕"] [text "⊕"]
+            ,button [class "myCopy", onClick <| Copy "⊼"] [text "⊼"]
+            ,button [class "myCopy", onClick <| Copy "∴"] [text "∴"]
+           ]
 ------------------------
 -- Making table
 makeTable : List String -> Argument -> Html Msg 
@@ -56,10 +76,11 @@ makeTable argfrontend argbackend =
       let vars = argbackend.vars 
       in 
       table 
-      [class "truth-table"] 
+      [class "truth-table"
+      ] 
       (
       [ tr 
-        [] 
+        [class "table-row"] 
         (makeTableHeaders (vars ++ (argfrontend)))
       ] 
       ++ 
@@ -110,6 +131,7 @@ makeDataContent l =
 type Msg = GotArgument (Result Http.Error Argument)
          | GetArgument String 
          | Submit
+         | Copy String 
 
 type alias Argument = {validity : String, cellContent : List (String, String), vars : List String, varAssignments : List String}
 
@@ -118,12 +140,13 @@ update msg model =
   case msg of 
    (GotArgument r) -> 
        case r of 
-        (Ok a)   -> ({model | argumentBackend = a}, Cmd.none)
-        (Err _ ) -> (model, Cmd.none)
+        (Ok a)   -> ({model | argumentBackend = a, loading = False, copiedButton = False}, Cmd.none)
+        (Err _ ) -> ({model | argumentFrontend = [], loading = False, copiedButton = False}, Cmd.none)
    (GetArgument s) -> 
-       ({model | argumentFrontendUnParsed = s}, Cmd.none)
+       ({model | argumentFrontendUnParsed = s, loading = False, copiedButton = False}, Cmd.none)
    Submit         ->  
-        ({model | loading = True, argumentFrontend = (String.lines model.argumentFrontendUnParsed)}, sendArgument model)
+        ({model | loading = True, argumentFrontend = (String.lines model.argumentFrontendUnParsed), copiedButton = False}, sendArgument model)
+   (Copy s) -> ({model | copiedButton = True},sendMessage s)
    
 ----------
 

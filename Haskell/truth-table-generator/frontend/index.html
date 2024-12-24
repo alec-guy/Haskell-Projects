@@ -12,6 +12,10 @@
     <script>
         var app = Elm.Main.init({
             node: document.getElementById('myapp')
+
+        });
+        app.ports.sendMessage.subscribe(function (message) {
+            navigator.clipboard.writeText(message);
         });
     </script>
 </body>
