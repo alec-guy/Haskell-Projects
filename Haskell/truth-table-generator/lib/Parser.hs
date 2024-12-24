@@ -64,4 +64,4 @@ table = [ [ Prefix  (Not <$ choice ((lexemeP . string) <$>  ["~", "¬", "!"]))
         ]
 
 parseEitherArgOrExpression :: ArgParser (Either Argument Proposition)
-parseEitherArgOrExpression = eitherP ( try parseArgument ) expression
+parseEitherArgOrExpression = eitherP ( try parseArgument ) (expression <* eof)

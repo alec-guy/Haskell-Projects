@@ -58,8 +58,16 @@ view model = div
              , text <| String.fromChar model.copiedButton
              , br [] [] 
              , text <| model.error
-             , h4 [] [text "By Alec-Guy"]
+             , br [] [] 
+             , myFooter
              ]
+-------------------------
+myFooter : Html Msg 
+myFooter = 
+   footer 
+   [class "myFooter"] 
+   [text "By Alec"]
+
 keyboard : Html Msg 
 keyboard = div 
            [class "keyboard"] 
@@ -151,7 +159,7 @@ update msg model =
   case msg of 
    (GotArgument r) -> 
        case r of 
-        (Ok a)   -> ({model | argumentBackend = a, loading = False}, Cmd.none)
+        (Ok a)   -> ({model | argumentBackend = a, loading = False, error = ""}, Cmd.none)
         (Err err) -> 
            case err of 
             BadUrl s ->  ({model | argumentFrontend = [], loading = False, error = s}, Cmd.none)
@@ -160,10 +168,10 @@ update msg model =
             BadStatus i -> ({model | argumentFrontend = [], loading = False, error = "Bad Status " ++ (String.fromInt i)}, Cmd.none)
             BadBody s -> ({model | argumentFrontend = [], loading = False, error = s}, Cmd.none)
    (GetArgument s) -> 
-       ({model | argumentFrontendUnParsed = s, loading = False}, Cmd.none)
+       ({model | argumentFrontendUnParsed = s, loading = False, error = ""}, Cmd.none)
    Submit         ->  
-        ({model | loading = True, argumentFrontend = (String.lines model.argumentFrontendUnParsed)}, sendArgument model)
-   (Copy s) -> ({model | copiedButton = toChar s},sendMessage s)
+        ({model | loading = True, argumentFrontend = (String.lines model.argumentFrontendUnParsed), error = ""}, sendArgument model)
+   (Copy s) -> ({model | copiedButton = toChar s, error = ""},sendMessage s)
    
 toChar : String -> Char 
 toChar s = (Maybe.withDefault ' ') <| List.head <| String.toList  s 
