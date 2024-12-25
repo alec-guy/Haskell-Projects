@@ -1,4 +1,4 @@
-module MyLib (Triangle(..),TA(..), exampleTriangle, getArea, isEqualatiral, isIsosceles, isScalene) where 
+module MyLib (Triangle(..),TA(..), getArea, isEqualatiral, isIsosceles, isScalene) where 
 
 import Data.Angle 
 
