@@ -26,22 +26,30 @@ getArea t =
     case getSides t of 
         (base, Nothing, (Nothing, Nothing)) -> Nothing 
         (base, Just h, (Nothing, Nothing))  -> Just (areaTriangle base h)
-        _ -> Nothing 
+        _ -> 
+             
 
 ----------------------------------------------
 getSides :: Triangle -> (Base,Maybe Height,(Maybe Float, Maybe Float))
 getSides t = 
     (base t, height t, (fst $ sides t, snd $ sides t))
 
-isEqualatiralTriangle :: Triangle -> Bool 
-isEqualatiralTriangle triangle = 
+isEqualatiral :: Triangle -> Bool 
+isEqualatiral triangle = 
     case getSides triangle of 
         ((Base b), _ , (Just x, Just y)) -> 
             case angles triangle of 
                 (Nothing, Nothing, Nothing) -> 
                    (b == x) && (b == y) 
-                (Just a, Just a2, Just a3) -> 
-                    ((b == x) && (b == y)) && ((a == a2) && (a == a3))
+isIsosceles  :: Triangle -> Bool 
+isIsosceles triangle = 
+    case getSides triangle of 
+        ((Base b)_ , (Just x, Just y)) -> 
+            (b /= x) && (x == y)
+            
+isScalene :: Triangle -> Bool 
+isScalene triangle = 
+    (not $ isEqualatiral triangle) && (not $ isIsosceles triangle)
 --------------------------------------------
 
 
