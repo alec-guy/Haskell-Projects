@@ -1,4 +1,4 @@
-module MyLib (Triangle(..),Side(..), TA(..)) where 
+module MyLib (Triangle(..),TA(..)) where 
 
 import Data.Angle 
 
@@ -10,32 +10,38 @@ newtype Base   = Base Float  deriving (Eq, Show)
 newtype Height = Height Float deriving (Eq, Show)
 
 data Triangle = Triangle 
-              { base ::   (Base, Maybe TA)
-              , height :: (Maybe Height, Maybe TA)
-              , sides :: ((Maybe Float, Maybe TA), (Maybe Float, Maybe TA))
+              { base ::   (Base)
+              , height :: (Maybe Height)
+              , sides :: (Maybe Float, Maybe Float)
+              , angles :: (Maybe TA, Maybe TA, Maybe TA)
               }
 --------------------------------------------
 -- Calculating area of a triangle 
 
-areaOfTriangle :: Base -> Height -> Float 
-areaOfTriangle (Base b) (Height h) = (1 / 2) * b * h 
+areaTriangle :: Base -> Height -> Float 
+areaTriangle (Base b) (Height h) = (1 / 2) * b * h 
 
 getArea :: Triangle -> Maybe Float 
 getArea t = 
     case getSides t of 
         (base, Nothing, (Nothing, Nothing)) -> Nothing 
-        (base, Just x, (Nothing, Nothing))  -> Just (areaOfTriangle base x)
-        
-
+        (base, Just h, (Nothing, Nothing))  -> Just (areaTriangle base h)
+        _ -> Nothing 
 
 ----------------------------------------------
 getSides :: Triangle -> (Base,Maybe Height,(Maybe Float, Maybe Float))
 getSides t = 
-    (fst $ base t, fst $ height t, (fst $ fst $ sides t, fst $ fst $ sides t))
+    (base t, height t, (fst $ sides t, snd $ sides t))
 
-getTAs :: Triangle -> (Maybe TA,Maybe TA,(Maybe TA, Maybe TA))
-getTAs t =
-    (snd $ base t, snd $ height t, (snd $ snd $ sides t, snd $ snd $ sides t))
+isEqualatiralTriangle :: Triangle -> Bool 
+isEqualatiralTriangle triangle = 
+    case getSides triangle of 
+        ((Base b), _ , (Just x, Just y)) -> 
+            case angles triangle of 
+                (Nothing, Nothing, Nothing) -> 
+                   (b == x) && (b == y) 
+                (Just a, Just a2, Just a3) -> 
+                    ((b == x) && (b == y)) && ((a == a2) && (a == a3))
 --------------------------------------------
 
 
