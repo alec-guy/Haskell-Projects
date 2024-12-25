@@ -66,7 +66,8 @@ myFooter : Html Msg
 myFooter = 
    footer 
    [class "myFooter"] 
-   [text "By Alec"]
+   [text "By Alec"
+   ]
 
 keyboard : Html Msg 
 keyboard = div 

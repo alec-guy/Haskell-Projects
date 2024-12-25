@@ -24,7 +24,6 @@ executable truth-table-generator
                       , megaparsec
                       , text
                       , aeson
-                      , vector
                       , parser-combinators
                       , scotty
                       , wai-middleware-static

@@ -2,10 +2,6 @@
 module Types where 
 
 import Data.Aeson 
-import Data.Text 
-import Data.Aeson.KeyMap as K
-import Data.Vector as V
-import Data.Aeson.Key 
 import GHC.Generics
 
 data Proposition = Var Char  
