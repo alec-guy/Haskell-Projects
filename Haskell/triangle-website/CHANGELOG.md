@@ -1,4 +1,4 @@
-# Revision history for triangle
+# Revision history for triangle-website
 
 ## 0.1.0.0 -- YYYY-mm-dd
 
