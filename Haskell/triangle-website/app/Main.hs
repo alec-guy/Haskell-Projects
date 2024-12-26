@@ -1,14 +1,21 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Main where
 
-import Web.scotty 
+import Web.Scotty 
 import Triangle 
 import Data.Aeson
+import Network.Wai.Middleware.Static
+import Data.Text 
+import Data.Text.Lazy
+
 
 
 main :: IO ()
 main = do 
+    htmlRoot <- fromStrict <$> Data.Text.pack <$> readFile "frontend/index.html"
     scotty 3000 $ do 
-        get "/"
+        middleware (staticPolicy (addBase "frontend"))
+        get "/" $ do
          html htmlRoot 
         
         

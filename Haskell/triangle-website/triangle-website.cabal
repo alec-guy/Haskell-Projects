@@ -70,7 +70,9 @@ executable triangle-website
     build-depends:    base ^>=4.20.0.0,
                       AC-Angle, 
                       scotty, 
-                      aeson
+                      aeson,
+                      wai-middleware-static,
+                      text
 
     -- Directories containing source files.
     hs-source-dirs:   app, lib
