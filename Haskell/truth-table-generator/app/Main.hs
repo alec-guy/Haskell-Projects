@@ -16,7 +16,7 @@ import Network.Wai.Middleware.Static
 main :: IO ()
 main = do 
     htmlRoot <- fromStrict <$> Data.Text.pack <$> readFile "frontend/index.html"
-    scotty 3000 $ do
+    scotty 3001 $ do
        middleware (staticPolicy (addBase "frontend"))
        post "/PropLogic" $ do 
          jsond <- Web.Scotty.catch (jsonData :: (ActionM PropLogicReq)) $ \e -> do 

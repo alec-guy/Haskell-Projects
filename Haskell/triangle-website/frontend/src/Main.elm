@@ -37,40 +37,64 @@ type alias Model = { displayBaseAndHeight : Bool
                    , base                 : Maybe Int 
                    , height               : Maybe Int 
                    }
-viewDisplayBaseAndHeight : Html Msg 
-viewDisplayBaseAndHeight = 
-       Html.form 
-       [] 
+radioSelection : Model -> Html Msg 
+radioSelection model = 
+      Html.form []
+     [ Html.label 
+         [] 
+         [
+             input 
+               [ Html.Attributes.type_ "radio"
+               , Html.Attributes.name "base-and-height"
+               , checked <| model.displayBaseAndHeight
+               , onClick <| BaseAndHeight <| not <| model.displayBaseAndHeight
+               ] 
+               []
+         , Html.text "base and height"
+         ] 
+    , Html.label []
        [
-         input [onInput Base] []
-       , input [onInput Height] []
+           input 
+            [ Html.Attributes.type_ "radio"
+            , Html.Attributes.name "three-sides"
+            , checked <| model.displayThreeSides
+            , onClick <| ThreeSides <| not <| model.displayThreeSides 
+            ] 
+            []
+       , Html.text "SSS"
        ]
+    , Html.label [] 
+       [
+           input  
+            [ Html.Attributes.type_ "radio"
+            , Html.Attributes.name "SAS"
+            , onClick <| SAS <| not <| model.displaySAS 
+            , checked <| model.displaySAS
+            ] 
+            []
+       ,Html.text "SAS"
+       ]
+    ]
 view : Model -> Html Msg 
 view model = 
    div 
-   [] 
-   [h1 [] [Html.text "My SVG"]
-   ,mySvg
-   ,br [] []
-   ,Html.select
-    [
-    ] 
-    [option
-     [
-     ,onCheck BaseAndHeight] 
-     [Html.text "base and height"] 
-    ,option
-     [onCheck ThreeSides] 
-     [Html.text "three sides (SSS)"]
-    ,option 
-     [onCheck SAS] 
-     [Html.text "two sides + angle between (SAS)"]
-    ] 
+   [Html.Attributes.style "text-align" "center"] 
+   [div [] [radioSelection model]
    , if model.displayBaseAndHeight 
-     then viewDisplayBaseAndHeight
+     then viewDisplayBaseAndHeight model 
      else Html.text ""
-   
    ]
+viewDisplayBaseAndHeight : Model -> Html Msg 
+viewDisplayBaseAndHeight model = 
+      div 
+      []
+      [
+      Html.form [] 
+      [input [onInput Base] []
+      ,input [onInput Height] []
+      ]
+      ,svgBox <| [mkTriangleBsHeight model.base model.height]
+      ]
 ------------------------------------------
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = 
@@ -87,41 +111,32 @@ update msg model =
     ({model | height = String.toInt s}, Cmd.none)
 
 subscriptions _ = Sub.none
-
-
+mkTriangleBsHeight : Maybe Int -> Maybe Int -> Svg Msg 
+mkTriangleBsHeight b h =           
+         let triangle = "M 150 150 H 180 V 50 L 150 150 "
+         in
+         S.g
+         [] 
+         [ S.path
+            [SA.d triangle
+            ,SA.stroke "black"
+            ,SA.fill "none"
+            ]
+            []
+         , S.text_ [SA.x "150", SA.y "160"] 
+           [S.text <| ("Base = " ++ ((\i -> if i == "0" then "" else i) <| String.fromInt <|  (Maybe.withDefault 0) <| b))]
+         , S.text_ [SA.x "185", SA.y "100"] 
+           [S.text <| ("Height = " ++ ((\i -> if i == "0" then "" else i) <| String.fromInt <|  (Maybe.withDefault 0) <| h))]
+         ]
+svgBox : List (Svg Msg) -> Html Msg 
+svgBox list = 
+   S.svg 
+   [
+    SA.width "300", SA.height "350"
+    , SA.version "1.1"
+    ,SA.xlinkHref "http://www.w3.org/2000/svg"
+   ]
+   list
 ------------------------------------------------
 ----         SVG ----------------
 --========================----------
-mySvg : Html Msg 
-mySvg = 
-   S.svg 
-   [SA.version "1.1"
-   ,SA.width "300"
-   ,SA.height "200"
-   ,SA.xlinkHref "http://www.w3.org/2000/svg"
-   ] 
-   [S.rect 
-    [SA.width "100%"
-    ,SA.height "100%"
-    ,SA.fill "red"
-    ] 
-    [
-    ]
-   ,S.circle 
-    [SA.cx "150"
-    ,SA.cy "100"
-    ,SA.r "80"
-    ,SA.fill "green"
-    ]
-    []
-   ,S.text_ 
-    [SA.x "150"
-    ,SA.y "125"
-    ,SA.fontSize "60"
-    ,SA.textAnchor "middle"
-    ,SA.fill "white"
-    ] 
-    [
-     S.text "SVG"
-    ]
-   ]
