@@ -56,13 +56,14 @@ view model =
     [
     ] 
     [option
-     [onClick BaseAndHeight] 
+     [
+     ,onCheck BaseAndHeight] 
      [Html.text "base and height"] 
     ,option
-     [onClick ThreeSides] 
+     [onCheck ThreeSides] 
      [Html.text "three sides (SSS)"]
     ,option 
-     [onClick SAS] 
+     [onCheck SAS] 
      [Html.text "two sides + angle between (SAS)"]
     ] 
    , if model.displayBaseAndHeight 
