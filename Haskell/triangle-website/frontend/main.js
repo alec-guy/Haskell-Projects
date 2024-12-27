@@ -5606,7 +5606,7 @@ var $author$project$Main$mkTriangleSAS = function (model) {
 				_List_fromArray(
 					[
 						$elm$svg$Svg$Attributes$d(triangle),
-						$elm$svg$Svg$Attributes$stroke('black'),
+						$elm$svg$Svg$Attributes$stroke('red'),
 						$elm$svg$Svg$Attributes$fill('none')
 					]),
 				_List_Nil),
@@ -5780,7 +5780,7 @@ var $author$project$Main$mkTriangleSSS = function (model) {
 				_List_fromArray(
 					[
 						$elm$svg$Svg$Attributes$d(triangle),
-						$elm$svg$Svg$Attributes$stroke('green'),
+						$elm$svg$Svg$Attributes$stroke('red'),
 						$elm$svg$Svg$Attributes$fill('none')
 					]),
 				_List_Nil),
