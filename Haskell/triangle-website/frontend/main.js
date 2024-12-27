@@ -5929,7 +5929,8 @@ var $author$project$Main$view = function (model) {
 		$elm$html$Html$div,
 		_List_fromArray(
 			[
-				A2($elm$html$Html$Attributes$style, 'text-align', 'center')
+				A2($elm$html$Html$Attributes$style, 'text-align', 'center'),
+				A2($elm$html$Html$Attributes$style, 'background-color', '#eff1f5')
 			]),
 		_List_fromArray(
 			[

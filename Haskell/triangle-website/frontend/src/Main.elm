@@ -96,7 +96,9 @@ radioSelection model =
 view : Model -> Html Msg 
 view model = 
    div 
-   [Html.Attributes.style "text-align" "center"] 
+   [Html.Attributes.style "text-align" "center"
+   ,Html.Attributes.style "background-color" "#eff1f5"
+   ] 
    [ h1 [] [Html.text "Triangle Area Calculator"]
    , br [] [] 
    , div [] [radioSelection model]
@@ -181,7 +183,7 @@ mkTriangleSAS model =
       [] 
       [ S.path 
         [SA.d triangle 
-        , SA.stroke "black"
+        , SA.stroke "red"
         , SA.fill "none"
         ]
         [] 
@@ -208,7 +210,7 @@ mkTriangleSSS model =
       [] 
       [ S.path
         [SA.d triangle 
-        ,SA.stroke "green"
+        ,SA.stroke "red"
         ,SA.fill "none"
         ]
         [] 
