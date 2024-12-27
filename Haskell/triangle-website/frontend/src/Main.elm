@@ -26,6 +26,9 @@ initModel = { displayBaseAndHeight = False
             , sss1       = Nothing 
             , sss2       = Nothing 
             , sss3       = Nothing 
+            , s1         = Nothing 
+            , s2         = Nothing 
+            , angle      = Nothing 
             }
 init _    = (initModel ,Cmd.none)
 type Msg = BaseAndHeight Bool 
@@ -36,6 +39,9 @@ type Msg = BaseAndHeight Bool
          | SSS1 String 
          | SSS2 String 
          | SSS3 String
+         | S1   String 
+         | S2   String 
+         | Angle String 
 
 type alias Model = { displayBaseAndHeight : Bool 
                    , displayThreeSides    : Bool 
@@ -45,6 +51,9 @@ type alias Model = { displayBaseAndHeight : Bool
                    , sss1                 : Maybe Int 
                    , sss2                 : Maybe Int 
                    , sss3                 : Maybe Int
+                   , s1                   : Maybe Int 
+                   , s2                   : Maybe Int 
+                   , angle                : Maybe Int 
                    }
 radioSelection : Model -> Html Msg 
 radioSelection model = 
@@ -55,7 +64,7 @@ radioSelection model =
              input 
                [ Html.Attributes.type_ "radio"
                , Html.Attributes.name "base-and-height"
-               , checked <| model.displayBaseAndHeight
+               , checked <| model.displayBaseAndHeight 
                , onClick <| BaseAndHeight <| not <| model.displayBaseAndHeight
                ] 
                []
@@ -66,7 +75,7 @@ radioSelection model =
            input 
             [ Html.Attributes.type_ "radio"
             , Html.Attributes.name "three-sides"
-            , checked <| model.displayThreeSides
+            , checked <| model.displayThreeSides 
             , onClick <| ThreeSides <| not <| model.displayThreeSides 
             ] 
             []
@@ -78,7 +87,7 @@ radioSelection model =
             [ Html.Attributes.type_ "radio"
             , Html.Attributes.name "SAS"
             , onClick <| SAS <| not <| model.displaySAS 
-            , checked <| model.displaySAS
+            , checked <| model.displaySAS 
             ] 
             []
        ,Html.text "SAS"
@@ -88,12 +97,16 @@ view : Model -> Html Msg
 view model = 
    div 
    [Html.Attributes.style "text-align" "center"] 
-   [div [] [radioSelection model]
+   [ h1 [] [Html.text "Triangle Area Calculator"]
+   , br [] [] 
+   , div [] [radioSelection model]
    , if model.displayBaseAndHeight 
      then viewDisplayBaseAndHeight model 
      else if model.displayThreeSides 
           then viewDisplayThreeSides model 
-          else Html.text ""
+          else if model.displaySAS 
+                then viewDisplaySAS model 
+                else Html.text ""
    ]
 viewDisplayBaseAndHeight : Model -> Html Msg 
 viewDisplayBaseAndHeight model = 
@@ -115,9 +128,22 @@ viewDisplayThreeSides model =
             [ label [] [input [onInput SSS1] [], Html.text "Enter side a"] 
             , label [] [input [onInput SSS2] [], Html.text "Enter side b"] 
             , label [] [input [onInput SSS3] [], Html.text "Enter side c"]
-            , svgBox [mkTriangleSSS model]
             ]
+           , svgBox [mkTriangleSSS model]
            ]
+viewDisplaySAS : Model -> Html Msg 
+viewDisplaySAS model = 
+           div 
+           [Html.Attributes.style "text-align" "center"] 
+           [
+            Html.form [] 
+            [ label [] [input [onInput S1]    [], Html.text "Enter side a"] 
+            , label [] [input [onInput S2]    [], Html.text "Enter side b"] 
+            , label [] [input [onInput Angle] [], Html.text "Enter angle < ab"]
+            ]
+           , svgBox [mkTriangleSAS model]
+           ]
+
 ------------------------------------------
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = 
@@ -138,9 +164,42 @@ update msg model =
       ({model | sss2 = String.toInt s}, Cmd.none)
    (SSS3 s )         -> 
       ({model | sss3 = String.toInt s}, Cmd.none)
+   (S1 s)            -> 
+      ({model | s1 = String.toInt s}, Cmd.none)
+   (S2 s)            -> 
+      ({model | s2 = String.toInt s}, Cmd.none)
+   (Angle s)         -> 
+      ({model | angle = String.toInt s}, Cmd.none)
 
 subscriptions _ = Sub.none
 
+mkTriangleSAS : Model -> Svg Msg 
+mkTriangleSAS model = 
+     let triangle = "M 150 150 H 180 M 170 50 L 150 150 M 170 50 L 180 150"
+     in 
+      S.g 
+      [] 
+      [ S.path 
+        [SA.d triangle 
+        , SA.stroke "black"
+        , SA.fill "none"
+        ]
+        [] 
+      , S.text_ [SA.x "150" , SA.y "160"]
+        [S.text <| ("a = " ++ ((\i -> if i == "0" then "" else i) <| String.fromInt <|  (Maybe.withDefault 0) <| model.s1))]
+      , S.text_ 
+        [SA.x "130", SA.y "100"] 
+        [S.text <| ("b = " ++ ((\i -> if i == "0" then "" else i) <| String.fromInt <|  (Maybe.withDefault 0) <| model.s2))]
+      , S.text_ 
+        [SA.x "50", SA.y "150"]
+        [S.text <| (" angle <ab = " ++ ((\i -> if i == "0" then "" else i) <| String.fromInt <|  (Maybe.withDefault 0) <| model.angle))]
+      , let maybeArea = case (model.s1, model.s2, model.angle) of 
+                         (Just s11, Just s22, Just anglee) -> 
+                            S.text_ [SA.x "50", SA.y "200"] 
+                            [S.text <| "Area = " ++ (String.fromFloat <| (1 / 2) * (toFloat s11) * (toFloat s22)  * (sin <| toFloat anglee))]
+                         _ -> S.text_ [] [] 
+        in maybeArea 
+      ]
 mkTriangleSSS : Model -> Svg Msg 
 mkTriangleSSS model = 
      let triangle = "M 150 150 H 180 M 170 50 L 150 150 M 170 50 L 180 150 "
@@ -149,7 +208,7 @@ mkTriangleSSS model =
       [] 
       [ S.path
         [SA.d triangle 
-        ,SA.stroke "black"
+        ,SA.stroke "green"
         ,SA.fill "none"
         ]
         [] 
@@ -161,6 +220,15 @@ mkTriangleSSS model =
       , S.text_
         [SA.x "50", SA.y "100"] 
         [S.text <| ("c = " ++ ((\i -> if i == "0" then "" else i) <| String.fromInt <|  (Maybe.withDefault 0) <| model.sss3))]
+      , let maybeArea = 
+              case (model.sss1, model.sss2, model.sss3) of 
+               (Just a, Just b , Just c) -> 
+                  S.text_ 
+                  [SA.x "50", SA.y "200"]
+                  [S.text <| ("Area = ")  ++ (String.fromFloat (heronsFormula a b c))]
+               _                         -> S.text_ [] []
+        in maybeArea 
+                         
       ]
       
 mkTriangleBsHeight : Maybe Int -> Maybe Int -> Svg Msg 
@@ -171,7 +239,7 @@ mkTriangleBsHeight b h  =
          [] 
          [ S.path
             [SA.d triangle
-            ,SA.stroke "black"
+            ,SA.stroke "red"
             ,SA.fill "none"
             ]
             []
@@ -187,11 +255,20 @@ mkTriangleBsHeight b h  =
            in maybeArea
 
          ]
+
+heronsFormula : Int -> Int -> Int -> Float
+heronsFormula a b c= 
+    let afloat = toFloat a 
+        bfloat = toFloat b 
+        cfloat = toFloat c
+        s = (afloat + bfloat + cfloat) / 2
+    in sqrt (s * (s - afloat) * (s - bfloat) * (s - cfloat))
+
 svgBox : List (Svg Msg) -> Html Msg 
 svgBox list = 
    S.svg 
    [
-    SA.width "300", SA.height "350"
+    SA.width "500", SA.height "500"
     , SA.version "1.1"
     ,SA.xlinkHref "http://www.w3.org/2000/svg"
    ]
