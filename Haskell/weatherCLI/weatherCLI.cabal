@@ -69,7 +69,10 @@ executable weatherCLI
     -- Other library packages from which modules are imported.
     build-depends:    base ^>=4.20.0.0, 
                       megaparsec,
-                      parser-combinators
+                      parser-combinators,
+                      http-conduit, 
+                      bytestring,
+                      aeson
 
     -- Directories containing source files.
     hs-source-dirs:   app, lib
