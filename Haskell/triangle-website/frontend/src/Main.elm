@@ -23,6 +23,9 @@ initModel = { displayBaseAndHeight = False
             , displaySAS = False
             , base       = Nothing 
             , height     = Nothing 
+            , sss1       = Nothing 
+            , sss2       = Nothing 
+            , sss3       = Nothing 
             }
 init _    = (initModel ,Cmd.none)
 type Msg = BaseAndHeight Bool 
@@ -30,12 +33,18 @@ type Msg = BaseAndHeight Bool
          | SAS Bool 
          | Base String
          | Height String 
+         | SSS1 String 
+         | SSS2 String 
+         | SSS3 String
 
 type alias Model = { displayBaseAndHeight : Bool 
                    , displayThreeSides    : Bool 
                    , displaySAS           : Bool 
                    , base                 : Maybe Int 
                    , height               : Maybe Int 
+                   , sss1                 : Maybe Int 
+                   , sss2                 : Maybe Int 
+                   , sss3                 : Maybe Int
                    }
 radioSelection : Model -> Html Msg 
 radioSelection model = 
@@ -82,7 +91,9 @@ view model =
    [div [] [radioSelection model]
    , if model.displayBaseAndHeight 
      then viewDisplayBaseAndHeight model 
-     else Html.text ""
+     else if model.displayThreeSides 
+          then viewDisplayThreeSides model 
+          else Html.text ""
    ]
 viewDisplayBaseAndHeight : Model -> Html Msg 
 viewDisplayBaseAndHeight model = 
@@ -90,11 +101,23 @@ viewDisplayBaseAndHeight model =
       []
       [
       Html.form [] 
-      [input [onInput Base] []
-      ,input [onInput Height] []
+      [ label [] [input [onInput Base] [], Html.text "Enter Base"]
+      , label [] [input [onInput Height] [], Html.text "Enter Height"]
       ]
       ,svgBox <| [mkTriangleBsHeight model.base model.height]
       ]
+viewDisplayThreeSides : Model -> Html Msg 
+viewDisplayThreeSides model = 
+           div 
+           [Html.Attributes.style "text-align" "center"] 
+           [
+            Html.form [] 
+            [ label [] [input [onInput SSS1] [], Html.text "Enter side a"] 
+            , label [] [input [onInput SSS2] [], Html.text "Enter side b"] 
+            , label [] [input [onInput SSS3] [], Html.text "Enter side c"]
+            , svgBox [mkTriangleSSS model]
+            ]
+           ]
 ------------------------------------------
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = 
@@ -109,10 +132,39 @@ update msg model =
      ({model | base = String.toInt s}, Cmd.none)-- if (not <| String.isEmpty model.height) && (not <| String.isEmpty model.height))
    (Height s)        -> 
     ({model | height = String.toInt s}, Cmd.none)
+   (SSS1 s )         -> 
+      ({model | sss1 = String.toInt s}, Cmd.none)
+   (SSS2 s )         -> 
+      ({model | sss2 = String.toInt s}, Cmd.none)
+   (SSS3 s )         -> 
+      ({model | sss3 = String.toInt s}, Cmd.none)
 
 subscriptions _ = Sub.none
+
+mkTriangleSSS : Model -> Svg Msg 
+mkTriangleSSS model = 
+     let triangle = "M 150 150 H 180 M 170 50 L 150 150 M 170 50 L 180 150 "
+     in 
+      S.g 
+      [] 
+      [ S.path
+        [SA.d triangle 
+        ,SA.stroke "black"
+        ,SA.fill "none"
+        ]
+        [] 
+      , S.text_ [SA.x "150", SA.y "160"] 
+        [S.text <| ("a = " ++ ((\i -> if i == "0" then "" else i) <| String.fromInt <|  (Maybe.withDefault 0) <| model.sss1))]
+      , S.text_ 
+        [SA.x "185", SA.y "100"] 
+        [S.text <| ("b = " ++ ((\i -> if i == "0" then "" else i) <| String.fromInt <|  (Maybe.withDefault 0) <| model.sss2))]
+      , S.text_
+        [SA.x "50", SA.y "100"] 
+        [S.text <| ("c = " ++ ((\i -> if i == "0" then "" else i) <| String.fromInt <|  (Maybe.withDefault 0) <| model.sss3))]
+      ]
+      
 mkTriangleBsHeight : Maybe Int -> Maybe Int -> Svg Msg 
-mkTriangleBsHeight b h =           
+mkTriangleBsHeight b h  =           
          let triangle = "M 150 150 H 180 V 50 L 150 150 "
          in
          S.g
@@ -127,6 +179,13 @@ mkTriangleBsHeight b h =
            [S.text <| ("Base = " ++ ((\i -> if i == "0" then "" else i) <| String.fromInt <|  (Maybe.withDefault 0) <| b))]
          , S.text_ [SA.x "185", SA.y "100"] 
            [S.text <| ("Height = " ++ ((\i -> if i == "0" then "" else i) <| String.fromInt <|  (Maybe.withDefault 0) <| h))]
+         , let maybeArea = case (b, h) of 
+                            (Just b1, Just h2) -> 
+                                 S.text_ [SA.x "150", SA.y "200"] 
+                                 [S.text <| ("Area = " ++ (String.fromFloat <| (toFloat b1) * (toFloat h2) * (1 / 2)))]
+                            _ -> S.text_ [] []
+           in maybeArea
+
          ]
 svgBox : List (Svg Msg) -> Html Msg 
 svgBox list = 

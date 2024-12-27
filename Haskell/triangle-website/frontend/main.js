@@ -784,11 +784,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.O.C === region.U.C)
+	if (region.R.C === region.X.C)
 	{
-		return 'on line ' + region.O.C;
+		return 'on line ' + region.R.C;
 	}
-	return 'on lines ' + region.O.C + ' through ' + region.U.C;
+	return 'on lines ' + region.R.C + ' through ' + region.X.C;
 }
 
 
@@ -1857,9 +1857,9 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.aF,
+		impl.aI,
+		impl.aW,
 		impl.aT,
-		impl.aQ,
 		function() { return function() {} }
 	);
 });
@@ -2720,8 +2720,8 @@ var _VirtualDom_mapEventRecord = F2(function(func, record)
 {
 	return {
 		o: func(record.o),
-		P: record.P,
-		M: record.M
+		S: record.S,
+		P: record.P
 	}
 });
 
@@ -2990,10 +2990,10 @@ function _VirtualDom_makeCallback(eventNode, initialHandler)
 
 		var value = result.a;
 		var message = !tag ? value : tag < 3 ? value.a : value.o;
-		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.P;
+		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.S;
 		var currentEventNode = (
 			stopPropagation && event.stopPropagation(),
-			(tag == 2 ? value.b : tag == 3 && value.M) && event.preventDefault(),
+			(tag == 2 ? value.b : tag == 3 && value.P) && event.preventDefault(),
 			eventNode
 		);
 		var tagger;
@@ -3943,11 +3943,11 @@ var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debug
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.aF,
+		impl.aI,
+		impl.aW,
 		impl.aT,
-		impl.aQ,
 		function(sendToApp, initialModel) {
-			var view = impl.aU;
+			var view = impl.aX;
 			/**/
 			var domNode = args['node'];
 			//*/
@@ -3979,12 +3979,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.aF,
+		impl.aI,
+		impl.aW,
 		impl.aT,
-		impl.aQ,
 		function(sendToApp, initialModel) {
-			var divertHrefToApp = impl.N && impl.N(sendToApp)
-			var view = impl.aU;
+			var divertHrefToApp = impl.Q && impl.Q(sendToApp)
+			var view = impl.aX;
 			var title = _VirtualDom_doc.title;
 			var bodyNode = _VirtualDom_doc.body;
 			var currNode = _VirtualDom_virtualize(bodyNode);
@@ -3992,12 +3992,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 			{
 				_VirtualDom_divertHrefToApp = divertHrefToApp;
 				var doc = view(model);
-				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.ay);
+				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.aB);
 				var patches = _VirtualDom_diff(currNode, nextNode);
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.aS) && (_VirtualDom_doc.title = title = doc.aS);
+				(title !== doc.aV) && (_VirtualDom_doc.title = title = doc.aV);
 			});
 		}
 	);
@@ -4053,12 +4053,12 @@ function _Browser_makeAnimator(model, draw)
 
 function _Browser_application(impl)
 {
-	var onUrlChange = impl.aI;
-	var onUrlRequest = impl.aJ;
+	var onUrlChange = impl.aL;
+	var onUrlRequest = impl.aM;
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
-		N: function(sendToApp)
+		Q: function(sendToApp)
 		{
 			key.a = sendToApp;
 			_Browser_window.addEventListener('popstate', key);
@@ -4074,9 +4074,9 @@ function _Browser_application(impl)
 					var next = $elm$url$Url$fromString(href).a;
 					sendToApp(onUrlRequest(
 						(next
-							&& curr.ag === next.ag
-							&& curr.Y === next.Y
-							&& curr.ad.a === next.ad.a
+							&& curr.aj === next.aj
+							&& curr.aa === next.aa
+							&& curr.ag.a === next.ag.a
 						)
 							? $elm$browser$Browser$Internal(next)
 							: $elm$browser$Browser$External(href)
@@ -4084,13 +4084,13 @@ function _Browser_application(impl)
 				}
 			});
 		},
-		aF: function(flags)
+		aI: function(flags)
 		{
-			return A3(impl.aF, flags, _Browser_getUrl(), key);
+			return A3(impl.aI, flags, _Browser_getUrl(), key);
 		},
-		aU: impl.aU,
-		aT: impl.aT,
-		aQ: impl.aQ
+		aX: impl.aX,
+		aW: impl.aW,
+		aT: impl.aT
 	});
 }
 
@@ -4156,17 +4156,17 @@ var _Browser_decodeEvent = F2(function(decoder, event)
 function _Browser_visibilityInfo()
 {
 	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { aD: 'hidden', az: 'visibilitychange' }
+		? { aG: 'hidden', aC: 'visibilitychange' }
 		:
 	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { aD: 'mozHidden', az: 'mozvisibilitychange' }
+		? { aG: 'mozHidden', aC: 'mozvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { aD: 'msHidden', az: 'msvisibilitychange' }
+		? { aG: 'msHidden', aC: 'msvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { aD: 'webkitHidden', az: 'webkitvisibilitychange' }
-		: { aD: 'hidden', az: 'visibilitychange' };
+		? { aG: 'webkitHidden', aC: 'webkitvisibilitychange' }
+		: { aG: 'hidden', aC: 'visibilitychange' };
 }
 
 
@@ -4247,11 +4247,11 @@ var _Browser_call = F2(function(functionName, id)
 function _Browser_getViewport()
 {
 	return {
-		am: _Browser_getScene(),
-		ar: {
-			at: _Browser_window.pageXOffset,
-			au: _Browser_window.pageYOffset,
-			as: _Browser_doc.documentElement.clientWidth,
+		ap: _Browser_getScene(),
+		au: {
+			aw: _Browser_window.pageXOffset,
+			ax: _Browser_window.pageYOffset,
+			av: _Browser_doc.documentElement.clientWidth,
 			I: _Browser_doc.documentElement.clientHeight
 		}
 	};
@@ -4262,7 +4262,7 @@ function _Browser_getScene()
 	var body = _Browser_doc.body;
 	var elem = _Browser_doc.documentElement;
 	return {
-		as: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
+		av: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
 		I: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
 	};
 }
@@ -4286,14 +4286,14 @@ function _Browser_getViewportOf(id)
 	return _Browser_withNode(id, function(node)
 	{
 		return {
-			am: {
-				as: node.scrollWidth,
+			ap: {
+				av: node.scrollWidth,
 				I: node.scrollHeight
 			},
-			ar: {
-				at: node.scrollLeft,
-				au: node.scrollTop,
-				as: node.clientWidth,
+			au: {
+				aw: node.scrollLeft,
+				ax: node.scrollTop,
+				av: node.clientWidth,
 				I: node.clientHeight
 			}
 		};
@@ -4324,17 +4324,17 @@ function _Browser_getElement(id)
 		var x = _Browser_window.pageXOffset;
 		var y = _Browser_window.pageYOffset;
 		return {
-			am: _Browser_getScene(),
-			ar: {
-				at: x,
-				au: y,
-				as: _Browser_doc.documentElement.clientWidth,
+			ap: _Browser_getScene(),
+			au: {
+				aw: x,
+				ax: y,
+				av: _Browser_doc.documentElement.clientWidth,
 				I: _Browser_doc.documentElement.clientHeight
 			},
-			aB: {
-				at: x + rect.left,
-				au: y + rect.top,
-				as: rect.width,
+			aE: {
+				aw: x + rect.left,
+				ax: y + rect.top,
+				av: rect.width,
 				I: rect.height
 			}
 		};
@@ -4874,7 +4874,7 @@ var $elm$url$Url$Http = 0;
 var $elm$url$Url$Https = 1;
 var $elm$url$Url$Url = F6(
 	function (protocol, host, port_, path, query, fragment) {
-		return {W: fragment, Y: host, ab: path, ad: port_, ag: protocol, ah: query};
+		return {Z: fragment, aa: host, ae: path, ag: port_, aj: protocol, ak: query};
 	});
 var $elm$core$String$contains = _String_contains;
 var $elm$core$String$length = _String_length;
@@ -5153,7 +5153,7 @@ var $elm$core$Task$perform = F2(
 			A2($elm$core$Task$map, toMessage, task));
 	});
 var $elm$browser$Browser$element = _Browser_element;
-var $author$project$Main$initModel = {H: $elm$core$Maybe$Nothing, v: false, A: false, B: false, I: $elm$core$Maybe$Nothing};
+var $author$project$Main$initModel = {H: $elm$core$Maybe$Nothing, v: false, B: false, w: false, I: $elm$core$Maybe$Nothing, J: $elm$core$Maybe$Nothing, K: $elm$core$Maybe$Nothing, L: $elm$core$Maybe$Nothing};
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (_v0) {
@@ -5179,14 +5179,14 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{B: b}),
+						{w: b}),
 					$elm$core$Platform$Cmd$none);
 			case 2:
 				var b = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{A: b}),
+						{B: b}),
 					$elm$core$Platform$Cmd$none);
 			case 3:
 				var s = msg.a;
@@ -5197,13 +5197,40 @@ var $author$project$Main$update = F2(
 							H: $elm$core$String$toInt(s)
 						}),
 					$elm$core$Platform$Cmd$none);
-			default:
+			case 4:
 				var s = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
 							I: $elm$core$String$toInt(s)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 5:
+				var s = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							J: $elm$core$String$toInt(s)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 6:
+				var s = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							K: $elm$core$String$toInt(s)
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var s = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							L: $elm$core$String$toInt(s)
 						}),
 					$elm$core$Platform$Cmd$none);
 		}
@@ -5295,9 +5322,9 @@ var $author$project$Main$radioSelection = function (model) {
 							[
 								$elm$html$Html$Attributes$type_('radio'),
 								$elm$html$Html$Attributes$name('three-sides'),
-								$elm$html$Html$Attributes$checked(model.B),
+								$elm$html$Html$Attributes$checked(model.w),
 								$elm$html$Html$Events$onClick(
-								$author$project$Main$ThreeSides(!model.B))
+								$author$project$Main$ThreeSides(!model.w))
 							]),
 						_List_Nil),
 						$elm$html$Html$text('SSS')
@@ -5314,8 +5341,8 @@ var $author$project$Main$radioSelection = function (model) {
 								$elm$html$Html$Attributes$type_('radio'),
 								$elm$html$Html$Attributes$name('SAS'),
 								$elm$html$Html$Events$onClick(
-								$author$project$Main$SAS(!model.A)),
-								$elm$html$Html$Attributes$checked(model.A)
+								$author$project$Main$SAS(!model.B)),
+								$elm$html$Html$Attributes$checked(model.B)
 							]),
 						_List_Nil),
 						$elm$html$Html$text('SAS')
@@ -5332,6 +5359,7 @@ var $author$project$Main$Height = function (a) {
 };
 var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
 var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
+var $elm$core$String$fromFloat = _String_fromNumber;
 var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var $elm$svg$Svg$g = $elm$svg$Svg$trustedNode('g');
 var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
@@ -5397,7 +5425,31 @@ var $author$project$Main$mkTriangleBsHeight = F2(
 							}(
 								$elm$core$String$fromInt(
 									A2($elm$core$Maybe$withDefault, 0, h))))
-						]))
+						])),
+					function () {
+					var maybeArea = function () {
+						var _v0 = _Utils_Tuple2(b, h);
+						if ((!_v0.a.$) && (!_v0.b.$)) {
+							var b1 = _v0.a.a;
+							var h2 = _v0.b.a;
+							return A2(
+								$elm$svg$Svg$text_,
+								_List_fromArray(
+									[
+										$elm$svg$Svg$Attributes$x('150'),
+										$elm$svg$Svg$Attributes$y('200')
+									]),
+								_List_fromArray(
+									[
+										$elm$svg$Svg$text(
+										'Area = ' + $elm$core$String$fromFloat((b1 * h2) * (1 / 2)))
+									]));
+						} else {
+							return A2($elm$svg$Svg$text_, _List_Nil, _List_Nil);
+						}
+					}();
+					return maybeArea;
+				}()
 				]));
 	});
 var $elm$html$Html$Events$alwaysStop = function (x) {
@@ -5468,24 +5520,177 @@ var $author$project$Main$viewDisplayBaseAndHeight = function (model) {
 				_List_fromArray(
 					[
 						A2(
-						$elm$html$Html$input,
+						$elm$html$Html$label,
+						_List_Nil,
 						_List_fromArray(
 							[
-								$elm$html$Html$Events$onInput($author$project$Main$Base)
-							]),
-						_List_Nil),
+								A2(
+								$elm$html$Html$input,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onInput($author$project$Main$Base)
+									]),
+								_List_Nil),
+								$elm$html$Html$text('Enter Base')
+							])),
 						A2(
-						$elm$html$Html$input,
+						$elm$html$Html$label,
+						_List_Nil,
 						_List_fromArray(
 							[
-								$elm$html$Html$Events$onInput($author$project$Main$Height)
-							]),
-						_List_Nil)
+								A2(
+								$elm$html$Html$input,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onInput($author$project$Main$Height)
+									]),
+								_List_Nil),
+								$elm$html$Html$text('Enter Height')
+							]))
 					])),
 				$author$project$Main$svgBox(
 				_List_fromArray(
 					[
 						A2($author$project$Main$mkTriangleBsHeight, model.H, model.I)
+					]))
+			]));
+};
+var $author$project$Main$SSS1 = function (a) {
+	return {$: 5, a: a};
+};
+var $author$project$Main$SSS2 = function (a) {
+	return {$: 6, a: a};
+};
+var $author$project$Main$SSS3 = function (a) {
+	return {$: 7, a: a};
+};
+var $author$project$Main$mkTriangleSSS = function (model) {
+	var triangle = 'M 150 150 H 180 M 170 50 L 150 150 M 170 50 L 180 150 ';
+	return A2(
+		$elm$svg$Svg$g,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$svg$Svg$path,
+				_List_fromArray(
+					[
+						$elm$svg$Svg$Attributes$d(triangle),
+						$elm$svg$Svg$Attributes$stroke('black'),
+						$elm$svg$Svg$Attributes$fill('none')
+					]),
+				_List_Nil),
+				A2(
+				$elm$svg$Svg$text_,
+				_List_fromArray(
+					[
+						$elm$svg$Svg$Attributes$x('150'),
+						$elm$svg$Svg$Attributes$y('160')
+					]),
+				_List_fromArray(
+					[
+						$elm$svg$Svg$text(
+						'Side 1 = ' + function (i) {
+							return (i === '0') ? '' : i;
+						}(
+							$elm$core$String$fromInt(
+								A2($elm$core$Maybe$withDefault, 0, model.J))))
+					])),
+				A2(
+				$elm$svg$Svg$text_,
+				_List_fromArray(
+					[
+						$elm$svg$Svg$Attributes$x('185'),
+						$elm$svg$Svg$Attributes$y('100')
+					]),
+				_List_fromArray(
+					[
+						$elm$svg$Svg$text(
+						'Side 2 = ' + function (i) {
+							return (i === '0') ? '' : i;
+						}(
+							$elm$core$String$fromInt(
+								A2($elm$core$Maybe$withDefault, 0, model.K))))
+					])),
+				A2(
+				$elm$svg$Svg$text_,
+				_List_fromArray(
+					[
+						$elm$svg$Svg$Attributes$x('50'),
+						$elm$svg$Svg$Attributes$y('100')
+					]),
+				_List_fromArray(
+					[
+						$elm$svg$Svg$text(
+						'Side 3 = ' + function (i) {
+							return (i === '0') ? '' : i;
+						}(
+							$elm$core$String$fromInt(
+								A2($elm$core$Maybe$withDefault, 0, model.L))))
+					]))
+			]));
+};
+var $author$project$Main$viewDisplayThreeSides = function (model) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'text-align', 'center')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$form,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$label,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$input,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onInput($author$project$Main$SSS1)
+									]),
+								_List_Nil),
+								$elm$html$Html$text('Enter side 1')
+							])),
+						A2(
+						$elm$html$Html$label,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$input,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onInput($author$project$Main$SSS2)
+									]),
+								_List_Nil),
+								$elm$html$Html$text('Enter side 2')
+							])),
+						A2(
+						$elm$html$Html$label,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$input,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onInput($author$project$Main$SSS3)
+									]),
+								_List_Nil),
+								$elm$html$Html$text('Enter side 3')
+							])),
+						$author$project$Main$svgBox(
+						_List_fromArray(
+							[
+								$author$project$Main$mkTriangleSSS(model)
+							]))
 					]))
 			]));
 };
@@ -5505,10 +5710,10 @@ var $author$project$Main$view = function (model) {
 					[
 						$author$project$Main$radioSelection(model)
 					])),
-				model.v ? $author$project$Main$viewDisplayBaseAndHeight(model) : $elm$html$Html$text('')
+				model.v ? $author$project$Main$viewDisplayBaseAndHeight(model) : (model.w ? $author$project$Main$viewDisplayThreeSides(model) : $elm$html$Html$text(''))
 			]));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
-	{aF: $author$project$Main$init, aQ: $author$project$Main$subscriptions, aT: $author$project$Main$update, aU: $author$project$Main$view});
+	{aI: $author$project$Main$init, aT: $author$project$Main$subscriptions, aW: $author$project$Main$update, aX: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	$elm$json$Json$Decode$succeed(0))(0)}});}(this));
