@@ -57,21 +57,29 @@ parseUsername = do
     case (Data.List.length chrs <= 20 ) of 
         True -> 
             case (Data.List.length (Data.List.filter isAlphaNum chrs)) > (fromIntegral $ round ((fromIntegral $ Data.List.length chrs) / 2 )) of 
-                True -> return $ Username $ pack $ chrs 
+                True -> case notSameCharacter chrs of 
+                         True ->  return $ Username $ pack $ chrs 
+                         False -> parseError $ FancyError 1 (Data.Set.singleton $ ErrorFail "username cannot have the same character")
                 False -> parseError $ FancyError 1 (Data.Set.singleton $ ErrorFail "username must have more than half numbers or letters than '-' or '_' symbols")
-        False -> parseError $ FancyError 1 (Data.Set.singleton $ ErrorFail "username must be less than or equal to 20 characters")
+        False -> parseError $ FancyError 1 (Data.Set.singleton $ ErrorFail "username must be no greater than 20 characters")
 parsePassword :: Parser Password 
-parsePassword = undefined
+parsePassword = do 
+    chars <- many printChar 
+    case (Data.List.length chars <= 20) of 
+        True -> case (Data.List.length chars >= 9) of 
+                 True  -> case notSameCharacter chars of 
+                           True  -> return $ Password $ pack chars
+                           False -> parseError $ FancyError 1 (Data.Set.singleton $ ErrorFail "password cannot have the same character")
+                 False -> parseError $ FancyError 1 (Data.Set.singleton $ ErrorFail "password must be at least 9 characters long")
+        False -> parseError $ FancyError 1 (Data.Set.singleton $ ErrorFail "password must be no greater than 20 characters")
+
+notSameCharacter :: Eq a => [a] -> Bool 
+notSameCharacter [] = True 
+notSameCharacter (x : xs) = not $ (Data.List.all (== x) (xs))
+
 ------------
 
 main :: IO ()
 main = do 
     putStrLn "Hello, Haskell!"
-    putStr "Enter username: "
-    hFlush stdout
-    username <- getLine 
-    let maybeU = parse parseUsername "" (pack username) 
-    case maybeU of 
-        Left e  -> putStrLn $ errorBundlePretty e 
-        Right u -> putStrLn $ show u
 
