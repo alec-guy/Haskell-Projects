@@ -21,7 +21,7 @@ insertZipGeo (Zipcode zipcode) myapikey =
 insertLatLon :: LatLonCity -> ApiKey -> String 
 insertLatLon latloncitt myapikey = 
     "data/3.0/onecall?lat=" ++ (show $ lat latloncitt) ++ "&lon=" ++ (show $ lon latloncitt)++ "&exclude=current&appid=" ++ myapikey
-
+-- comment
 getZipCode :: Command -> Zipcode 
 getZipCode command = 
     case command of 
