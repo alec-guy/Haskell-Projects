@@ -1,6 +1,7 @@
 
 {-# LANGUAGE DeriveGeneric #-} 
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 module Main where
 
 import Data.Text
@@ -23,12 +24,15 @@ import System.IO (hFlush , stdout)
 ----Types 
 newtype Username = Username Text deriving (Show, Eq, Generic)
 newtype Password = Password Text deriving (Show, Eq, Generic)
+
+instance ToJSON Username where 
+instance ToJSON Password where 
 instance FromJSON Username where 
 instance FromJSON Password where 
+
 data User = User 
           {username       :: Username
           ,password       :: Password  
-          ,posts          :: [BlogPost]
           } deriving (Show, Eq, Generic)
 
 data BlogPost = BlogPost 
@@ -36,9 +40,11 @@ data BlogPost = BlogPost
               ,timeCreated :: (UTCTime, Day)
               }
               deriving (Show , Eq, Generic)
+
 instance FromJSON BlogPost where 
 instance FromJSON User where 
-
+instance ToJSON User where 
+instance ToJSON BlogPost where 
 
 ------------------
 --Parser 
@@ -78,8 +84,28 @@ notSameCharacter [] = True
 notSameCharacter (x : xs) = not $ (Data.List.all (== x) (xs))
 
 ------------
+-- Saving 
+
+saveUser :: User -> IO () 
+saveUser (User {username = u, ..})= encodeFile "users.txt" (User {username = u, ..})
+
+saveBlogpost :: BlogPost -> IO () 
+saveBlogpost (BlogPost {blogPost = b, ..}) = encodeFile "blogposts.txt" (BlogPost {blogPost = b, ..})
+------------
 
 main :: IO ()
 main = do 
     putStrLn "Hello, Haskell!"
-
+    putStr "Enter Username: "
+    hFlush stdout 
+    usern <- getLine 
+    putStr "Enter Password: "
+    hFlush stdout
+    passwd <- getLine 
+    usernn <- case parse parseUsername "" (pack usern) of 
+               Left  err -> error $ errorBundlePretty err 
+               Right us  -> return us 
+    psswdd   <- case parse parsePassword "" (pack passwd) of 
+                 Left  err -> error $ errorBundlePretty err 
+                 Right ps  -> return ps
+    saveUser (User {username = usernn, password = psswdd})
