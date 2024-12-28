@@ -13,6 +13,12 @@ import System.IO (hFlush, stdout)
 import Control.Exception (catch, SomeException(..))
 import Data.Aeson
 
+
+{- 
+   Project is stalled for now until I get a valid 
+   debit card to sign up for free for the api
+
+-}
 type ApiKey = String 
 insertZipGeo :: Zipcode -> ApiKey -> String 
 insertZipGeo (Zipcode zipcode) myapikey = 
