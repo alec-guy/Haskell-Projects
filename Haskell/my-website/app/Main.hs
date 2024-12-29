@@ -18,7 +18,9 @@ import Data.Void (Void)
 import Control.Monad.Combinators
 import Data.List 
 import Data.Char (isLetter, isDigit,isAlphaNum)
-import System.IO (hFlush , stdout)
+import System.IO 
+import Data.ByteString
+import Data.ByteString.Lazy 
 
 
 ----Types 
@@ -38,6 +40,7 @@ data User = User
 data BlogPost = BlogPost 
               {blogPost    :: Text 
               ,timeCreated :: (UTCTime, Day)
+              ,blogCreator :: Username
               }
               deriving (Show , Eq, Generic)
 
@@ -64,7 +67,7 @@ parseUsername = do
         True -> 
             case (Data.List.length (Data.List.filter isAlphaNum chrs)) > (fromIntegral $ round ((fromIntegral $ Data.List.length chrs) / 2 )) of 
                 True -> case notSameCharacter chrs of 
-                         True ->  return $ Username $ pack $ chrs 
+                         True ->  return $ Username $ Data.Text.pack $ chrs 
                          False -> parseError $ FancyError 1 (Data.Set.singleton $ ErrorFail "username cannot have the same character")
                 False -> parseError $ FancyError 1 (Data.Set.singleton $ ErrorFail "username must have more than half numbers or letters than '-' or '_' symbols")
         False -> parseError $ FancyError 1 (Data.Set.singleton $ ErrorFail "username must be no greater than 20 characters")
@@ -74,7 +77,7 @@ parsePassword = do
     case (Data.List.length chars <= 20) of 
         True -> case (Data.List.length chars >= 9) of 
                  True  -> case notSameCharacter chars of 
-                           True  -> return $ Password $ pack chars
+                           True  -> return $ Password $ Data.Text.pack chars
                            False -> parseError $ FancyError 1 (Data.Set.singleton $ ErrorFail "password cannot have the same character")
                  False -> parseError $ FancyError 1 (Data.Set.singleton $ ErrorFail "password must be at least 9 characters long")
         False -> parseError $ FancyError 1 (Data.Set.singleton $ ErrorFail "password must be no greater than 20 characters")
@@ -87,30 +90,35 @@ notSameCharacter (x : xs) = not $ (Data.List.all (== x) (xs))
 -- Saving 
 
 saveUser :: User -> IO () 
-saveUser (User {username = u, ..})= encodeFile "users.txt" (User {username = u, ..})
+saveUser (User {username = u, ..}) = do 
+    let encoded = Data.ByteString.append (Data.ByteString.toStrict $ encode $ User {username = u, ..}) "\n"
+    Data.ByteString.appendFile "users.txt" (encoded)
 
 saveBlogpost :: BlogPost -> IO () 
-saveBlogpost (BlogPost {blogPost = b, ..}) = encodeFile "blogposts.txt" (BlogPost {blogPost = b, ..})
+saveBlogpost (BlogPost {blogPost = b, ..}) = do 
+    let encoded = Data.ByteString.append (Data.ByteString.toStrict $ encode $ BlogPost {blogPost = b, ..}) "\n"
+    Data.ByteString.appendFile "blogposts.txt" ( encoded)
 ------------
 
 main :: IO ()
 main = do 
-    putStrLn "Hello, Haskell!"
-    putStr "Enter Username: "
+    System.IO.putStrLn "Hello, Haskell!"
+    System.IO.putStr "Enter Username: "
     hFlush stdout 
-    usern <- getLine 
-    putStr "Enter Password: "
+    usern <- System.IO.getLine 
+    System.IO.putStr "Enter Password: "
     hFlush stdout
-    passwd <- getLine 
-    usernn <- case parse parseUsername "" (pack usern) of 
+    passwd <- System.IO.getLine 
+    usernn <- case parse parseUsername "" (Data.Text.pack usern) of 
                Left  err -> error $ errorBundlePretty err 
                Right us  -> return us 
-    psswdd   <- case parse parsePassword "" (pack passwd) of 
+    psswdd   <- case parse parsePassword "" (Data.Text.pack passwd) of 
                  Left  err -> error $ errorBundlePretty err 
                  Right ps  -> return ps
-    saveUser (User {username = usernn, password = psswdd})
-    putStr "Enter blogpost: "
+    let currentUser = (User {username = usernn, password = psswdd})
+    saveUser currentUser
+    System.IO.putStr "Enter blogpost: "
     hFlush stdout 
-    blogpostt <- getLine 
+    blogpostt <- System.IO.getLine 
     currenttime <- getCurrentTime
-    saveBlogpost (BlogPost {blogPost = pack blogpostt, timeCreated = (currenttime, utctDay currenttime)})
+    saveBlogpost (BlogPost {blogPost = Data.Text.pack blogpostt, timeCreated = (currenttime, utctDay currenttime),blogCreator = username currentUser})

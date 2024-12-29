@@ -1,1 +1,3 @@
-{"blogPost":"This is a blog post that sucks","timeCreated":["2024-12-28T23:59:56.8414168Z","2024-12-28"]}
+{"blogPost":"This is my first blog post","timeCreated":["2024-12-29T23:33:51.6233164Z","2024-12-29"]}
+{"blogPost":"This is my first blog post by alec","timeCreated":["2024-12-29T23:34:14.1307332Z","2024-12-29"]}
+{"blogCreator":"root-beer-guy","blogPost":"This is another blog post","timeCreated":["2024-12-29T23:37:33.8643708Z","2024-12-29"]}

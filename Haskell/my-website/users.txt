@@ -1,1 +1,3 @@
-{"password":"password123","username":"doctor_mario"}
+{"password":"password123","username":"root-beer-guy"}
+{"password":"password123","username":"alecTheMenace"}
+{"password":"password123","username":"root-beer-guy"}
