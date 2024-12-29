@@ -109,3 +109,8 @@ main = do
                  Left  err -> error $ errorBundlePretty err 
                  Right ps  -> return ps
     saveUser (User {username = usernn, password = psswdd})
+    putStr "Enter blogpost: "
+    hFlush stdout 
+    blogpostt <- getLine 
+    currenttime <- getCurrentTime
+    saveBlogpost (BlogPost {blogPost = pack blogpostt, timeCreated = (currenttime, utctDay currenttime)})
